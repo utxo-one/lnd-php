@@ -6,7 +6,8 @@ use Exception;
 use UtxoOne\LndPhp\Helpers\Validator;
 use UtxoOne\LndPhp\Models\NodeInfo;
 
-class Lnd {
+class Lnd
+{
 
     /**
      * Host
@@ -76,14 +77,13 @@ class Lnd {
      * @throws Exception
      */
     public function __construct(
-        string $host, 
-        int $port, 
-        string $macaroonPath, 
-        string $tlsCertificatePath, 
+        string $host,
+        int $port,
+        string $macaroonPath,
+        string $tlsCertificatePath,
         string $apiVersion = 'v1',
         bool $useSsl = true,
-        )
-    {
+    ) {
         $this->validator = new Validator();
         $this->host = $this->validator->validateHost($host);
         $this->port = $port;
@@ -109,30 +109,30 @@ class Lnd {
     {
         $url = $this->host . '/' . $this->apiVersion . '/' . $endpoint;
 
-		$headers = [
+        $headers = [
             'Grpc-Metadata-macaroon: ' . $this->macaroonHex,
             'Content-Type: application/json',
         ];
 
-		$curlHandle = curl_init();
-		curl_setopt($curlHandle, CURLOPT_URL, $url);
-		curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
-		curl_setopt($curlHandle, CURLOPT_CAPATH, $this->tlsCertificatePath);
-		curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
-		curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, 2);
-		curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $url);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curlHandle, CURLOPT_CAPATH, $this->tlsCertificatePath);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, 2);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
 
-		if($data) {
+        if ($data) {
             curl_setopt($curlHandle, CURLOPT_POSTFIELDS, json_encode($data));
         }
 
-		$response = json_decode(curl_exec($curlHandle));
-		curl_close($curlHandle);
+        $response = json_decode(curl_exec($curlHandle));
+        curl_close($curlHandle);
 
-		if(!$response){
-			throw new Exception('Error: ' . curl_error($curlHandle));
-		}
+        if (!$response) {
+            throw new Exception('Error: ' . curl_error($curlHandle));
+        }
 
-		return json_decode(json_encode($response), true);
+        return json_decode(json_encode($response), true);
     }
 }

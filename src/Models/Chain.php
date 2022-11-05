@@ -2,7 +2,8 @@
 
 namespace UtxoOne\LndPhp\Models;
 
-class Chain {
+class Chain
+{
     public function __construct(private array $data)
     {
     }

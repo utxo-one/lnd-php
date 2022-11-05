@@ -7,7 +7,8 @@ use UtxoOne\LndPhp\Models\ChannelPoint;
 use UtxoOne\LndPhp\Models\NodeInfo;
 use UtxoOne\LndPhp\Services\Lnd;
 
-class LightningService extends Lnd {
+class LightningService extends Lnd
+{
 
     /**
      * AbandonChannel
@@ -28,10 +29,10 @@ class LightningService extends Lnd {
      * @throws Exception
      */
     public function abandonChannel(
-        ChannelPoint $channelPoint, 
-        bool $pendingFundingShimOnly = false, 
-        bool $iKnowWhatIAmDoing = false): bool
-    {
+        ChannelPoint $channelPoint,
+        bool $pendingFundingShimOnly = false,
+        bool $iKnowWhatIAmDoing = false
+    ): bool {
         try {
             $this->call('GET', 'getinfo', [
                 'channel_point' => $channelPoint->getFundingTxidStr(),
@@ -40,10 +41,9 @@ class LightningService extends Lnd {
             ]);
 
             return true;
-            
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
-        }      
+        }
     }
 
     /**
@@ -65,7 +65,6 @@ class LightningService extends Lnd {
             return new NodeInfo($this->call('GET', 'getinfo', null));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
-        }      
+        }
     }
-
 }

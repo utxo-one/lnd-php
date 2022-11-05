@@ -6,7 +6,8 @@ use UtxoOne\LndPhp\Models\NodeFeatureList;
 use UtxoOne\LndPhp\Models\NodeInfo;
 use UtxoOne\LndPhp\Services\LightningService;
 
-final class LightningServiceTest extends BaseTest {
+final class LightningServiceTest extends BaseTest
+{
 
     private LightningService $lightningService;
 
