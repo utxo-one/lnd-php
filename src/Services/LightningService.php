@@ -3,13 +3,14 @@
 namespace UtxoOne\LndPhp\Services;
 
 use Exception;
+use UtxoOne\LndPhp\Enums\InvoiceState;
 use UtxoOne\LndPhp\Models\ChannelPoint;
 use UtxoOne\LndPhp\Models\NodeInfo;
+use UtxoOne\LndPhp\Responses\AddInvoiceResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
 {
-
     /**
      * AbandonChannel
      * 
@@ -20,9 +21,9 @@ class LightningService extends Lnd
      * 
      * @link https://api.lightning.community/#abandonchannel
      * 
-     * @param ChannelPoint $channelPoint
-     * @param bool $pendingFundingShimOnly
-     * @param bool $iKnowWhatIAmDoing
+     * @param ChannelPoint  $channelPoint
+     * @param bool          $pendingFundingShimOnly
+     * @param bool          $iKnowWhatIAmDoing
      * 
      * @return void
      * 
@@ -41,6 +42,169 @@ class LightningService extends Lnd
             ]);
 
             return true;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * AddInvoice
+     * 
+     * AddInvoice attempts to add a new invoice to the invoice database. 
+     * Any duplicated invoices are rejected, therefore all invoices *must* have a unique payment preimage.
+     * 
+     * @link https://api.lightning.community/#addinvoice
+     * 
+     * @param string        $memo               Optional. An optional memo to attach along with the invoice. 
+     *                                          Used for record keeping purposes for the invoice's creator, 
+     *                                          and will also be set in the description field of the encoded 
+     *                                          payment request if the description_hash field is not being used.
+     * 
+     * @param string        $rPreimage          Required. The hex-encoded preimage (32 byte) which will allow 
+     *                                          settling an incoming HTLC payable to this preimage. 
+     *                                          When using REST, this field must be encoded as base64.
+     * 
+     * @param string        $rHash              Required. The hash of the preimage. When using REST, 
+     *                                          this field must be encoded as base64. 
+     *                                          Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $value              Required. The value of this invoice in satoshis. 
+     *                                          The fields value and value_msat are mutually exclusive.
+     * 
+     * @param int           $valueMsat          Required. The value of this invoice in millisatoshis. 
+     *                                          The fields value and value_msat are mutually exclusive.
+     * 
+     * @param int           $creationDate       Required. When this invoice was created. 
+     *                                          Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $settleDate         Required. When this invoice was settled. 
+     *                                          Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $creationDate       Required. When this invoice was created. 
+     *                                          Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param string        $paymentRequest     Required. A bare-bones invoice for a payment within the Lightning Network. 
+     *                                          With the details of the invoice, the sender has all the data necessary to 
+     *                                          send a payment to the recipient. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param string        $descriptionHash    Required. Hash (SHA-256) of a description of the payment. 
+     *                                          Used if the description of payment (memo) is too long to naturally 
+     *                                          fit within the description field of an encoded payment request. 
+     *                                          When using REST, this field must be encoded as base64.
+     * 
+     * @param int           $expiry             Required. Payment request expiry time in seconds. Default is 3600 (1 hour).
+     * 
+     * @param string        $fallbackAddr       Required. Fallback on-chain address.
+     * 
+     * @param int           $cltvExpiry         Required. Delta to use for the time-lock of the CLTV extended to the final hop.
+     * 
+     * @param array         $routeHints         Required. Route hints that can each be individually used to assist 
+     *                                          in reaching the invoice's destination.
+     * 
+     * @param bool          $private            Required. Whether this invoice should include routing hints for private channels.
+     * 
+     * @param int           $addIndex           Required. The "add" index of this invoice. Each newly created invoice will increment 
+     *                                          this index making it monotonically increasing. Callers to the SubscribeInvoices call 
+     *                                          can use this to instantly get notified of all added invoices with an add_index greater 
+     *                                          than this one. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $settleIndex        Required. The "settle" index of this invoice. Each newly settled invoice will increment 
+     *                                          this index making it monotonically increasing. Callers to the SubscribeInvoices call 
+     *                                          can use this to instantly get notified of all settled invoices with an settle_index greater 
+     *                                          than this one. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $amtPaidSat         Required. The amount that was accepted for this invoice, in satoshis. This will ONLY be set if this invoice 
+     *                                          has been settled. We provide this field as if the invoice was created with a zero value, 
+     *                                          then we need to record what amount was ultimately accepted. 
+     *                                          Additionally, it's possible that the sender paid MORE that was specified in the original invoice. 
+     *                                          So we'll record that here as well. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $amtPaidMsat        Required. The amount that was accepted for this invoice, in millisatoshis. This will ONLY be set if this invoice 
+     *                                          has been settled. We provide this field as if the invoice was created with a zero value, 
+     *                                          then we need to record what amount was ultimately accepted. 
+     *                                          Additionally, it's possible that the sender paid MORE that was specified in the original invoice. 
+     *                                          So we'll record that here as well. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param InvoiceState  $state              Required. The state the invoice is in. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param InvoiceHtlc[] $htlcs              Required. List of HTLCs paying to this invoice. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param array         $features           Required. List of features advertised on the invoice. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param bool          $isKeysend          Required. Whether this invoice was a keysend invoice. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param string        $paymentAddr        Required. The payment address of this invoice. This value will be used in MPP payments, 
+     *                                          and also for newer invoices that always require the MPP payload for added end-to-end security. 
+     *                                          Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param bool          $isAmp              Required. Signals whether or not this is an AMP invoice.
+     * 
+     * @param array         $ampInvoiceState    Experimental. Maps a 32-byte hex-encoded set ID to the sub-invoice AMP state for the given set ID. 
+     *                                          This field is always populated for AMP invoices, and can be used along side LookupInvoice to obtain 
+     *                                          the HTLC information related to a given sub-invoice. Note: Output only, don't specify for creating an invoice.
+     * 
+     * @return AddInvoiceResponse
+     * 
+     * @throws Exception
+     */
+    public function addInvoice(
+        string $receipt,
+        string $rPreimage,
+        string $rHash,
+        int $value,
+        int $valueMsat,
+        int $creationDate,
+        int $settleDate,
+        string $paymentRequest,
+        string $descriptionHash,
+        int $expiry,
+        string $fallbackAddr,
+        int $cltvExpiry,
+        array $routeHints,
+        bool $private,
+        int $addIndex,
+        int $settleIndex,
+        int $amtPaidSat,
+        int $amtPaidMsat,
+        InvoiceState $state,
+        array $htlcs,
+        array $features,
+        bool $isKeysend,
+        string $paymentAddr,
+        bool $isAmp,
+        array $ampInvoiceState = null,
+        ?string $memo,
+    ): AddInvoiceResponse {
+        
+        try {
+            return new AddInvoiceResponse($this->call('POST', 'addinvoice', [
+                'receipt' => $receipt,
+                'r_preimage' => $rPreimage,
+                'r_hash' => $rHash,
+                'value' => $value,
+                'value_msat' => $valueMsat,
+                'creation_date' => $creationDate,
+                'settle_date' => $settleDate,
+                'payment_request' => $paymentRequest,
+                'description_hash' => $descriptionHash,
+                'expiry' => $expiry,
+                'fallback_addr' => $fallbackAddr,
+                'cltv_expiry' => $cltvExpiry,
+                'route_hints' => $routeHints,
+                'private' => $private,
+                'add_index' => $addIndex,
+                'settle_index' => $settleIndex,
+                'amt_paid_sat' => $amtPaidSat,
+                'amt_paid_msat' => $amtPaidMsat,
+                'state' => $state,
+                'htlcs' => $htlcs,
+                'features' => $features,
+                'is_keysend' => $isKeysend,
+                'payment_addr' => $paymentAddr,
+                'is_amp' => $isAmp,
+                'amp_invoice_state' => $ampInvoiceState,
+                'memo' => $memo,
+            ]));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
