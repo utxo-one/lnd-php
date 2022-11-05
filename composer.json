@@ -1,0 +1,27 @@
+{
+    "name": "utxo-one/lnd-php",
+    "description": "An opinionated SDK for lncli commands via PHP",
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "pestphp/pest": "^1.22",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "UtxoOne\\LndPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "utxo.one",
+            "email": "github@utxo.one"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
