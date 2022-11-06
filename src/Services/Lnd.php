@@ -107,7 +107,7 @@ class Lnd
      */
     public function call(string $method, string $endpoint, ?array $data): array
     {
-        $url = $this->host . '/' . $this->apiVersion . '/' . $endpoint;
+        $url = $this->host . '/' . $endpoint;
 
         $headers = [
             'Grpc-Metadata-macaroon: ' . $this->macaroonHex,

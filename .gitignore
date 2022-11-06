@@ -2,3 +2,4 @@
 /tests/.env
 admin.macaroon
 tls.cert
+.phpunit.result.cache

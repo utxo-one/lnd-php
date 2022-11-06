@@ -2,6 +2,7 @@
 
 namespace UtxoOne\LndPhp\Services;
 
+use Endpoint;
 use Exception;
 use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
@@ -37,11 +38,15 @@ class LightningService extends Lnd
         bool $iKnowWhatIAmDoing = false
     ): bool {
         try {
-            $this->call('GET', 'getinfo', [
-                'channel_point' => $channelPoint->getFundingTxidStr(),
-                'pending_funding_shim_only' => $pendingFundingShimOnly,
-                'i_know_what_i_am_doing' => $iKnowWhatIAmDoing,
-            ]);
+            $this->call(
+                method: Endpoint::LIGHTNING_ABANDONCHANNEL->getMethod(),
+                endpoint: Endpoint::LIGHTNING_ABANDONCHANNEL->getPath(),
+                data: [
+                    'channel_point' => $channelPoint->getFundingTxidStr(),
+                    'pending_funding_shim_only' => $pendingFundingShimOnly,
+                    'i_know_what_i_am_doing' => $iKnowWhatIAmDoing,
+                ]
+            );
 
             return true;
         } catch (Exception $e) {
@@ -179,34 +184,38 @@ class LightningService extends Lnd
     ): AddInvoiceResponse {
 
         try {
-            return new AddInvoiceResponse($this->call('POST', 'addinvoice', [
-                'receipt' => $receipt,
-                'r_preimage' => $rPreimage,
-                'r_hash' => $rHash,
-                'value' => $value,
-                'value_msat' => $valueMsat,
-                'creation_date' => $creationDate,
-                'settle_date' => $settleDate,
-                'payment_request' => $paymentRequest,
-                'description_hash' => $descriptionHash,
-                'expiry' => $expiry,
-                'fallback_addr' => $fallbackAddr,
-                'cltv_expiry' => $cltvExpiry,
-                'route_hints' => $routeHints,
-                'private' => $private,
-                'add_index' => $addIndex,
-                'settle_index' => $settleIndex,
-                'amt_paid_sat' => $amtPaidSat,
-                'amt_paid_msat' => $amtPaidMsat,
-                'state' => $state,
-                'htlcs' => $htlcs,
-                'features' => $features,
-                'is_keysend' => $isKeysend,
-                'payment_addr' => $paymentAddr,
-                'is_amp' => $isAmp,
-                'amp_invoice_state' => $ampInvoiceState,
-                'memo' => $memo,
-            ]));
+            return new AddInvoiceResponse($this->call(
+                method: Endpoint::LIGHTNING_ADDINVOICE->getMethod(),
+                endpoint: Endpoint::LIGHTNING_ADDINVOICE->getPath(),
+                data: [
+                    'receipt' => $receipt,
+                    'r_preimage' => $rPreimage,
+                    'r_hash' => $rHash,
+                    'value' => $value,
+                    'value_msat' => $valueMsat,
+                    'creation_date' => $creationDate,
+                    'settle_date' => $settleDate,
+                    'payment_request' => $paymentRequest,
+                    'description_hash' => $descriptionHash,
+                    'expiry' => $expiry,
+                    'fallback_addr' => $fallbackAddr,
+                    'cltv_expiry' => $cltvExpiry,
+                    'route_hints' => $routeHints,
+                    'private' => $private,
+                    'add_index' => $addIndex,
+                    'settle_index' => $settleIndex,
+                    'amt_paid_sat' => $amtPaidSat,
+                    'amt_paid_msat' => $amtPaidMsat,
+                    'state' => $state,
+                    'htlcs' => $htlcs,
+                    'features' => $features,
+                    'is_keysend' => $isKeysend,
+                    'payment_addr' => $paymentAddr,
+                    'is_amp' => $isAmp,
+                    'amp_invoice_state' => $ampInvoiceState,
+                    'memo' => $memo,
+                ]
+            ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -235,11 +244,15 @@ class LightningService extends Lnd
     ): BakeMacaroonResponse {
 
         try {
-            return new BakeMacaroonResponse($this->call('POST', 'bakemacaroon', [
-                'permissions' => $permissions,
-                'root_key_id' => $rootKeyId,
-                'allow_external_permissions' => $allowExternalPermissions,
-            ]));
+            return new BakeMacaroonResponse($this->call(
+                method: Endpoint::LIGHTNING_BAKEMACAROON->getMethod(),
+                endpoint: Endpoint::LIGHTNING_BAKEMACAROON->getPath(),
+                data: [
+                    'permissions' => $permissions,
+                    'root_key_id' => $rootKeyId,
+                    'allow_external_permissions' => $allowExternalPermissions,
+                ]
+            ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -273,14 +286,18 @@ class LightningService extends Lnd
     ): BatchOpenChannelResponse {
 
         try {
-            return new BatchOpenChannelResponse($this->call('POST', 'batchopenchannel', [
-                'channels' => $channels,
-                'target_conf' => $targetConf,
-                'sat_per_vbyte' => $satPerVbyte,
-                'min_confs' => $minConfs,
-                'spend_unconfirmed' => $spendUnconfirmed,
-                'label' => $label,
-            ]));
+            return new BatchOpenChannelResponse($this->call(
+                method: Endpoint::LIGHTNING_BATCHOPENCHANNEL->getMethod(),
+                endpoint: Endpoint::LIGHTNING_BATCHOPENCHANNEL->getPath(),
+                data: [
+                    'channels' => $channels,
+                    'target_conf' => $targetConf,
+                    'sat_per_vbyte' => $satPerVbyte,
+                    'min_confs' => $minConfs,
+                    'spend_unconfirmed' => $spendUnconfirmed,
+                    'label' => $label,
+                ]
+            ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
