@@ -2,7 +2,7 @@
 
 namespace UtxoOne\LndPhp\Services;
 
-use Endpoint;
+use UtxoOne\LndPhp\Enums\Endpoint;
 use Exception;
 use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
@@ -224,7 +224,7 @@ class LightningService extends Lnd
     /**
      * BakeMacaroon
      * 
-     * BakeMacaroon allows the creation of a new macaroon with custom read and write permissions. 
+     * BakeMacaroon allows the creation of a new macaroon with custom read and write permissions. Endpoint
      * No first-party caveats are added since this can be done offline.
      * 
      * @link https://api.lightning.community/#bakeMacaroon

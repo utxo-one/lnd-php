@@ -1,5 +1,7 @@
 <?php
 
+namespace UtxoOne\LndPhp\Enums;
+
 enum Endpoint: string {
 
     /**
