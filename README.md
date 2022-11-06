@@ -8,14 +8,14 @@ A complete PHP SDK for LND implementations of the Lightning Network
 use UtxoOne\LndPhp\Services\LightningService;
 
 // Initialize an LND Instance.
-$lightningService = new LightningService();
+$lightningService = new LightningService(
     host: $this->host,
     port: $this->port,
     macaroonPath: $this->macaroonPath,
     tlsCertificatePath: $this->tlsCertificatePath,
     apiVersion: 'v1',
     useSsl: true,
-;
+);
 
 // Execute a command. ie getinfo
 $nodeInfo = $lightningService->getInfo();
