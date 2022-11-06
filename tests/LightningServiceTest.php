@@ -2,8 +2,10 @@
 
 use UtxoOne\LndPhp\Tests\BaseTest;
 use UtxoOne\LndPhp\Models\ChainList;
+use UtxoOne\LndPhp\Models\Lightning\Amount;
 use UtxoOne\LndPhp\Models\NodeFeatureList;
 use UtxoOne\LndPhp\Models\NodeInfo;
+use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Services\LightningService;
 
 final class LightningServiceTest extends BaseTest
@@ -88,6 +90,43 @@ final class LightningServiceTest extends BaseTest
     {
         $this->markTestIncomplete('requires testnet');
         //$this->lightningService->responseToChannelAcceptor();
+    }
+
+    /** @group channelBalance */
+    public function testItCanGetChannelBalance(): void
+    {
+        $channelBalance = $this->lightningService->channelBalance();
+
+        $this->assertInstanceOf(ChannelBalanceResponse::class, $channelBalance);
+
+        $this->assertIsString($channelBalance->getBalance());
+        $this->assertIsString($channelBalance->getPendingOpenBalance());
+
+        $this->assertInstanceOf(Amount::class, $channelBalance->getLocalBalance());
+        $this->assertIsString($channelBalance->getLocalBalance()->getSat());
+        $this->assertIsString($channelBalance->getLocalBalance()->getMsat());
+
+        $this->assertInstanceOf(Amount::class, $channelBalance->getRemoteBalance());
+        $this->assertIsString($channelBalance->getRemoteBalance()->getSat());
+        $this->assertIsString($channelBalance->getRemoteBalance()->getMsat());
+
+        $this->assertInstanceOf(Amount::class, $channelBalance->getPendingOpenLocalBalance());
+        $this->assertIsString($channelBalance->getPendingOpenLocalBalance()->getSat());
+        $this->assertIsString($channelBalance->getPendingOpenLocalBalance()->getMsat());
+
+        $this->assertInstanceOf(Amount::class, $channelBalance->getPendingOpenRemoteBalance());
+        $this->assertIsString($channelBalance->getPendingOpenRemoteBalance()->getSat());
+        $this->assertIsString($channelBalance->getPendingOpenRemoteBalance()->getMsat());
+
+        $this->assertInstanceOf(Amount::class, $channelBalance->getUnsettledLocalBalance());
+        $this->assertIsString($channelBalance->getUnsettledLocalBalance()->getSat());
+        $this->assertIsString($channelBalance->getUnsettledLocalBalance()->getMsat());
+
+        $this->assertInstanceOf(Amount::class, $channelBalance->getUnsettledRemoteBalance());
+        $this->assertIsString($channelBalance->getUnsettledRemoteBalance()->getSat());
+        $this->assertIsString($channelBalance->getUnsettledRemoteBalance()->getMsat());
+
+        //$this->dd($channelBalance);
     }
 
     

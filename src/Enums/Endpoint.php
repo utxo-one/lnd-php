@@ -91,7 +91,17 @@ enum Endpoint: string {
      */
     case LIGHTNING_CHANNELACCEPTOR = 'POST v1/channels/acceptor';
 
-    
+    /**
+     * Channel Balance
+     * 
+     * lncli: channelbalance ChannelBalance returns a report on the total funds across all open channels, 
+     * categorized in local/remote, pending local/remote and unsettled local/remote balances.
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-balance-channels
+     */
+    case LIGHTNING_CHANNELBALANCE = 'GET v1/balance/channels';
 
     public function getMethod(): string 
     {

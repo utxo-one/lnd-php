@@ -11,6 +11,7 @@ use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BatchOpenChannelResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelAcceptResponse;
+use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -121,25 +122,32 @@ class LightningService extends Lnd
      *                                          can use this to instantly get notified of all settled invoices with an settle_index greater 
      *                                          than this one. Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $amtPaidSat         Required. The amount that was accepted for this invoice, in satoshis. This will ONLY be set if this invoice 
+     * @param int           $amtPaidSat         Required. The amount that was accepted for this invoice, in satoshis. 
+     *                                          This will ONLY be set if this invoice has been settled. 
+     *                                          We provide this field as if the invoice was created with a zero value, 
+     *                                          then we need to record what amount was ultimately accepted. 
+     *                                          Additionally, it's possible that the sender paid MORE that 
+     *                                          was specified in the original invoice. So we'll record that here as well.
+     *                                          Note: Output only, don't specify for creating an invoice.
+     * 
+     * @param int           $amtPaidMsat        Required. The amount that was accepted for this invoice, in millisatoshis. 
+     *                                          This will ONLY be set if this invoice 
      *                                          has been settled. We provide this field as if the invoice was created with a zero value, 
      *                                          then we need to record what amount was ultimately accepted. 
      *                                          Additionally, it's possible that the sender paid MORE that was specified in the original invoice. 
      *                                          So we'll record that here as well. Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $amtPaidMsat        Required. The amount that was accepted for this invoice, in millisatoshis. This will ONLY be set if this invoice 
-     *                                          has been settled. We provide this field as if the invoice was created with a zero value, 
-     *                                          then we need to record what amount was ultimately accepted. 
-     *                                          Additionally, it's possible that the sender paid MORE that was specified in the original invoice. 
-     *                                          So we'll record that here as well. Note: Output only, don't specify for creating an invoice.
+     * @param InvoiceState  $state              Required. The state the invoice is in. 
+     *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param InvoiceState  $state              Required. The state the invoice is in. Note: Output only, don't specify for creating an invoice.
+     * @param InvoiceHtlc[] $htlcs              Required. List of HTLCs paying to this invoice. 
+     *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param InvoiceHtlc[] $htlcs              Required. List of HTLCs paying to this invoice. Note: Output only, don't specify for creating an invoice.
+     * @param array         $features           Required. List of features advertised on the invoice. 
+     *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param array         $features           Required. List of features advertised on the invoice. Note: Output only, don't specify for creating an invoice.
-     * 
-     * @param bool          $isKeysend          Required. Whether this invoice was a keysend invoice. Note: Output only, don't specify for creating an invoice.
+     * @param bool          $isKeysend          Required. Whether this invoice was a keysend invoice. 
+     *                                          Note: Output only, don't specify for creating an invoice.
      * 
      * @param string        $paymentAddr        Required. The payment address of this invoice. This value will be used in MPP payments, 
      *                                          and also for newer invoices that always require the MPP payload for added end-to-end security. 
@@ -381,6 +389,29 @@ class LightningService extends Lnd
                     'min_accept_depth' => $minAcceptDepth,
                     'zero_conf' => $zeroConf,
                 ]
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * ChannelBalance
+     * 
+     * lncli: channelbalance ChannelBalance returns a report on the total funds across all open channels, 
+     * categorized in local/remote, pending local/remote and unsettled local/remote balances.
+     * 
+     * @link https://api.lightning.community/#v1-balance-channels
+     * 
+     * @return ChannelBalanceResponse
+     */
+    public function channelBalance(): ChannelBalanceResponse
+    {
+        try {
+            return new ChannelBalanceResponse($this->call(
+                method: Endpoint::LIGHTNING_CHANNELBALANCE->getMethod(),
+                endpoint: Endpoint::LIGHTNING_CHANNELBALANCE->getPath(),
+                data: null,
             ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
