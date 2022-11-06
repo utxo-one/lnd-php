@@ -4,6 +4,7 @@ namespace UtxoOne\LndPhp\Enums;
 
 use UtxoOne\LndPhp\Traits\EnumHelper;
 
+/** @todo Get the actual enums */
 enum AmpInvoiceState: string
 {
     use EnumHelper;

@@ -65,4 +65,12 @@ final class LightningServiceTest extends BaseTest
         $this->markTestIncomplete('requires testnet');
         //$this->lightningService->abandonChannel();
     }
+
+    public function testItCanAddInvoice(): void
+    {
+        $this->markTestIncomplete('requires testnet');
+        //$this->lightningService->addInvoice();
+    }
+
+    
 }

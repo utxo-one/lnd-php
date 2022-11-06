@@ -7,6 +7,8 @@ use UtxoOne\LndPhp\Enums\InvoiceState;
 use UtxoOne\LndPhp\Models\ChannelPoint;
 use UtxoOne\LndPhp\Models\NodeInfo;
 use UtxoOne\LndPhp\Responses\AddInvoiceResponse;
+use UtxoOne\LndPhp\Responses\BakeMacaroonResponse;
+use UtxoOne\LndPhp\Responses\BatchOpenChannelResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -175,7 +177,7 @@ class LightningService extends Lnd
         array $ampInvoiceState = null,
         ?string $memo,
     ): AddInvoiceResponse {
-        
+
         try {
             return new AddInvoiceResponse($this->call('POST', 'addinvoice', [
                 'receipt' => $receipt,
@@ -204,6 +206,80 @@ class LightningService extends Lnd
                 'is_amp' => $isAmp,
                 'amp_invoice_state' => $ampInvoiceState,
                 'memo' => $memo,
+            ]));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * BakeMacaroon
+     * 
+     * BakeMacaroon allows the creation of a new macaroon with custom read and write permissions. 
+     * No first-party caveats are added since this can be done offline.
+     * 
+     * @link https://api.lightning.community/#bakeMacaroon
+     * 
+     * @param MacaroonPermission[]      $permissions                Required. The list of permissions the new macaroon should grant.
+     * @param string                    $rootKeyId                  Required. The root key ID used to create the macaroon, must be a positive integer.
+     * @param bool                      $allowExternalPermissions   Required. Informs the RPC on whether to allow external permissions that LND is not aware of.
+     * 
+     * @return BakeMacaroonResponse
+     * 
+     * @throws Exception
+     */
+    public function bakeMacaroon(
+        array $permissions,
+        string $rootKeyId,
+        bool $allowExternalPermissions = false,
+    ): BakeMacaroonResponse {
+
+        try {
+            return new BakeMacaroonResponse($this->call('POST', 'bakemacaroon', [
+                'permissions' => $permissions,
+                'root_key_id' => $rootKeyId,
+                'allow_external_permissions' => $allowExternalPermissions,
+            ]));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * BatchOpenChannel
+     * 
+     * BatchOpenChannel attempts to open multiple single-funded channels in a single transaction in an atomic way. 
+     * This means either all channel open requests succeed at once or all attempts are aborted if any of them fail. 
+     * This is the safer variant of using PSBTs to manually fund a batch of channels through the OpenChannel RPC.
+     * 
+     * @param BatchOpenChannel[]   $channels            Required. The list of channel open requests.
+     * @param int                  $targetConf          Required. The number of blocks that the funding transaction should be confirmed by.
+     * @param int                  $satPerVbyte         Required. A manual fee rate set in sat/vbyte that should be used when crafting the funding transaction.
+     * @param int                  $minConfs            Required. The minimum number of confirmations each of the channels should have before they are marked open.   
+     * @param bool                 $spendUnconfirmed    Required. Whether unconfirmed outputs should be used when attempting to fund the funding transaction.
+     * @param string               $label               Optional. An optional label for the batch transaction, limited to 500 characters.
+     * 
+     * @return BatchOpenChannelResponse
+     * 
+     * @throws Exception
+     */
+    public function batchOpenChannel(
+        array $channels,
+        int $targetConf,
+        int $satPerVbyte,
+        int $minConfs,
+        bool $spendUnconfirmed,
+        ?string $label,
+    ): BatchOpenChannelResponse {
+
+        try {
+            return new BatchOpenChannelResponse($this->call('POST', 'batchopenchannel', [
+                'channels' => $channels,
+                'target_conf' => $targetConf,
+                'sat_per_vbyte' => $satPerVbyte,
+                'min_confs' => $minConfs,
+                'spend_unconfirmed' => $spendUnconfirmed,
+                'label' => $label,
             ]));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
