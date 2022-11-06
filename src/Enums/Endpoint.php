@@ -78,6 +78,21 @@ enum Endpoint: string {
      */
      case LIGHTNING_BATCHOPENCHANNEL = 'POST v1/channels/batch';
 
+    /**
+     * Channel Acceptor
+     * 
+     * lncli: channelacceptor ChannelAcceptor is a bidirectional stream between the server and the client in which OpenChannel
+     * requests are sent to the client in order to determine whether the lnd node should accept or reject a channel open request.
+     * The client responds with a boolean that tells lnd whether it should accept the request or not.
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-channels-acceptor
+     */
+    case LIGHTNING_CHANNELACCEPTOR = 'POST v1/channels/acceptor';
+
+    
+
     public function getMethod(): string 
     {
         return explode(' ', $this->value)[0];

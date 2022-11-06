@@ -10,6 +10,7 @@ use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BatchOpenChannelResponse;
+use UtxoOne\LndPhp\Responses\Lightning\ChannelAcceptResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -296,6 +297,89 @@ class LightningService extends Lnd
                     'min_confs' => $minConfs,
                     'spend_unconfirmed' => $spendUnconfirmed,
                     'label' => $label,
+                ]
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * ChannelAcceptor
+     * 
+     * ChannelAcceptor is a bidirectional streaming RPC for allowing a node to accept inbound channels to its own peers. 
+     * This allows callers to specify their own criteria for accepting inbound channels, such as price, channel size, 
+     * or time of day. Each peer can have its own set of criteria, and the criteria can change over time. 
+     * This allows node operators to dynamically accept inbound channels based on their current needs.
+     * 
+     * @param bool                 $accept              Required. Whether or not the client accepts the channel.
+     * 
+     * @param string               $pendingChanId       Required. The pending channel id to which this response applies.
+     * 
+     * @param string               $error               Optional. An optional error to send the initiating party 
+     *                                                  to indicate why the channel was rejected. This field should not 
+     *                                                  contain sensitive information, it will be sent to the initiating party. 
+     *                                                  This field should only be set if accept is false, the channel 
+     *                                                  will be rejected if an error is set with accept=true because 
+     *                                                  the meaning of this response is ambiguous. Limited to 500 characters
+     * 
+     * @param string               $upfrontShutdown     Optional. An optional upfront shutdown address to use for the channel.
+     * 
+     * @param string               $csvDelay            Required. The csv delay (in blocks) that we require for the remote party.
+     * 
+     * @param string               $reserveSat          Required. The reserve amount in satoshis that we require 
+     *                                                  the remote peer to adhere to. We require that the remote peer 
+     *                                                  always have some reserve amount allocated to them so that 
+     *                                                  there is always a disincentive to broadcast old state 
+     *                                                  (if they hold 0 sats on their side of the channel, there is nothing to lose).
+     * 
+     * @param string               $inFlightMaxMsat     Required. The maximum amount of funds in millisatoshis that 
+     *                                                  we allow the remote peer to have in outstanding htlcs.
+     * 
+     * @param int                  $maxHtlcCount        Required. The maximum number of htlcs that we allow the remote peer to have in flight.
+     * 
+     * @param string               $minHtlcIn           Required. The minimum htlc amount in millisatoshis that we allow the remote peer to send to us.
+     * 
+     * @param int                  $minAcceptDepth      Required. The minimum number of confirmations that we require for the funding transaction.
+     * 
+     * @param bool                 $zeroConf            Required. The maximum amount of funds in millisatoshis that we allow 
+     *                                                  the remote peer to have pending in their channel reserve.
+     * 
+     * 
+     * @return ChannelAcceptResponse
+     * 
+     * @throws Exception
+     */
+    public function channelAcceptor(
+        bool $accept,
+        string $pendingChanId,
+        string $error,
+        string $upfrontShutdown,
+        string $csvDelay,
+        string $reserveSat,
+        string $inFlightMaxMsat,
+        int $maxHtlcCount,
+        string $minHtlcIn,
+        int $minAcceptDepth,
+        bool $zeroConf,
+    ): ChannelAcceptResponse {
+
+        try {
+            return new ChannelAcceptResponse($this->call(
+                method: Endpoint::LIGHTNING_CHANNELACCEPTOR->getMethod(),
+                endpoint: Endpoint::LIGHTNING_CHANNELACCEPTOR->getPath(),
+                data: [
+                    'accept' => $accept,
+                    'pending_chan_id' => $pendingChanId,
+                    'error' => $error,
+                    'upfront_shutdown' => $upfrontShutdown,
+                    'csv_delay' => $csvDelay,
+                    'reserve_sat' => $reserveSat,
+                    'in_flight_max_msat' => $inFlightMaxMsat,
+                    'max_htlc_count' => $maxHtlcCount,
+                    'min_htlc_in' => $minHtlcIn,
+                    'min_accept_depth' => $minAcceptDepth,
+                    'zero_conf' => $zeroConf,
                 ]
             ));
         } catch (Exception $e) {

@@ -78,5 +78,17 @@ final class LightningServiceTest extends BaseTest
         //$this->lightningService->batchOpenChannels();
     }
 
+    public function testItCanBakeMacaroon(): void
+    {
+        $this->markTestIncomplete('requires testnet');
+        //$this->lightningService->bakeMacaroon();
+    }
+
+    public function testItCanResponseToChannelAcceptor(): void
+    {
+        $this->markTestIncomplete('requires testnet');
+        //$this->lightningService->responseToChannelAcceptor();
+    }
+
     
 }
