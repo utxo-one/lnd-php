@@ -1,8 +1,8 @@
 <?php
 
-namespace UtxoOne\LndPhp\Responses;
+namespace UtxoOne\LndPhp\Responses\Lightning;
 
-use UtxoOne\LndPhp\Models\PendingUpdateList;
+use UtxoOne\LndPhp\Models\Lightning\PendingUpdateList;
 
 class BatchOpenChannelResponse
 {

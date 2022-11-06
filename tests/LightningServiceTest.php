@@ -72,5 +72,11 @@ final class LightningServiceTest extends BaseTest
         //$this->lightningService->addInvoice();
     }
 
+    public function testItCanBatchOpenChannels(): void
+    {
+        $this->markTestIncomplete('requires testnet');
+        //$this->lightningService->batchOpenChannels();
+    }
+
     
 }

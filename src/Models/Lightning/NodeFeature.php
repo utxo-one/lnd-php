@@ -1,6 +1,6 @@
 <?php
 
-namespace UtxoOne\LndPhp\Models;
+namespace UtxoOne\LndPhp\Models\Lightning;
 
 class NodeFeature {
 

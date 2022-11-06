@@ -1,6 +1,6 @@
 <?php
 
-namespace UtxoOne\LndPhp\Responses;
+namespace UtxoOne\LndPhp\Responses\Lightning;
 
 class BakeMacaroonResponse
 {

@@ -3,12 +3,12 @@
 namespace UtxoOne\LndPhp\Services;
 
 use Exception;
-use UtxoOne\LndPhp\Enums\InvoiceState;
-use UtxoOne\LndPhp\Models\ChannelPoint;
-use UtxoOne\LndPhp\Models\NodeInfo;
-use UtxoOne\LndPhp\Responses\AddInvoiceResponse;
-use UtxoOne\LndPhp\Responses\BakeMacaroonResponse;
-use UtxoOne\LndPhp\Responses\BatchOpenChannelResponse;
+use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
+use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
+use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
+use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
+use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
+use UtxoOne\LndPhp\Responses\Lightning\BatchOpenChannelResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd

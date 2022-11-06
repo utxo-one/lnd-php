@@ -1,6 +1,6 @@
 <?php
 
-namespace UtxoOne\LndPhp\Enums;
+namespace UtxoOne\LndPhp\Enums\Lightning;
 
 use UtxoOne\LndPhp\Traits\EnumHelper;
 
