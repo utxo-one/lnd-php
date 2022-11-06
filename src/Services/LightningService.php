@@ -434,7 +434,11 @@ class LightningService extends Lnd
     public function getInfo(): NodeInfo
     {
         try {
-            return new NodeInfo($this->call('GET', 'getinfo', null));
+            return new NodeInfo($this->call(
+                method: Endpoint::LIGHTNING_GETINFO->getMethod(),
+                endpoint: Endpoint::LIGHTNING_GETINFO->getPath(),
+                data: null,
+            ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

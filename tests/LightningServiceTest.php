@@ -1,10 +1,10 @@
 <?php
 
 use UtxoOne\LndPhp\Tests\BaseTest;
-use UtxoOne\LndPhp\Models\ChainList;
+use UtxoOne\LndPhp\Models\Lightning\ChainList;
 use UtxoOne\LndPhp\Models\Lightning\Amount;
-use UtxoOne\LndPhp\Models\NodeFeatureList;
-use UtxoOne\LndPhp\Models\NodeInfo;
+use UtxoOne\LndPhp\Models\Lightning\NodeFeatureList;
+use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Services\LightningService;
 
@@ -125,8 +125,6 @@ final class LightningServiceTest extends BaseTest
         $this->assertInstanceOf(Amount::class, $channelBalance->getUnsettledRemoteBalance());
         $this->assertIsString($channelBalance->getUnsettledRemoteBalance()->getSat());
         $this->assertIsString($channelBalance->getUnsettledRemoteBalance()->getMsat());
-
-        //$this->dd($channelBalance);
     }
 
     

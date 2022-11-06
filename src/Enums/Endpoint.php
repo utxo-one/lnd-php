@@ -103,6 +103,18 @@ enum Endpoint: string {
      */
     case LIGHTNING_CHANNELBALANCE = 'GET v1/balance/channels';
 
+    /**
+     * Get Info
+     * 
+     * lncli: getinfo GetInfo returns general information concerning the lightning node including it's identity pubkey,
+     * alias, the chains it is connected to, and information concerning the number of open+pending channels.
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-getinfo
+     */
+    case LIGHTNING_GETINFO = 'GET v1/getinfo';
+
     public function getMethod(): string 
     {
         return explode(' ', $this->value)[0];
