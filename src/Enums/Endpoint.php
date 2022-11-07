@@ -115,6 +115,18 @@ enum Endpoint: string {
      */
     case LIGHTNING_GETINFO = 'GET v1/getinfo';
 
+    /**
+     * Check Macaroon Permissions
+     * 
+     * CheckMacaroonPermissions checks whether a request follows the constraints imposed 
+     * on the macaroon and that the macaroon is authorized to follow the provided permissions.
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-macaroon-checkpermissions
+     */
+    case LIGHTNING_CHECKMACPERM = 'POST v1/macaroon/checkpermissions';
+
     public function getMethod(): string 
     {
         return explode(' ', $this->value)[0];

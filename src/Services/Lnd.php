@@ -81,14 +81,12 @@ class Lnd
         int $port,
         string $macaroonPath,
         string $tlsCertificatePath,
-        string $apiVersion = 'v1',
         bool $useSsl = true,
     ) {
         $this->validator = new Validator();
         $this->host = $this->validator->validateHost($host);
         $this->port = $port;
         $this->macaroonPath = $this->validator->validateMacaroonPath($macaroonPath);
-        $this->apiVersion = $apiVersion;
         $this->macaroonHex = $this->validator->validateMacaroonHex($macaroonPath);
         $this->tlsCertificatePath = $this->validator->validateTlsCertificatePath($tlsCertificatePath);
         $this->useSsl = $useSsl;
@@ -134,5 +132,10 @@ class Lnd
         }
 
         return json_decode(json_encode($response), true);
+    }
+
+    public function getMacaroonHex(): string
+    {
+        return $this->macaroonHex;
     }
 }

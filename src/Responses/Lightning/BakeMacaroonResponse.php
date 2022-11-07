@@ -12,4 +12,14 @@ class BakeMacaroonResponse
     {
         return $this->data['macaroon'];
     }
+
+    public function getMacaroon(): string
+    {
+        return $this->data['macaroon'];
+    }
+
+    public function __toString()
+    {
+        return $this->data['macaroon'];
+    }
 }

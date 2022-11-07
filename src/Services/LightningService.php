@@ -12,6 +12,7 @@ use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BatchOpenChannelResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelAcceptResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
+use UtxoOne\LndPhp\Responses\Lightning\CheckMacPermResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -412,6 +413,42 @@ class LightningService extends Lnd
                 method: Endpoint::LIGHTNING_CHANNELBALANCE->getMethod(),
                 endpoint: Endpoint::LIGHTNING_CHANNELBALANCE->getPath(),
                 data: null,
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * CheckMacaroonPermissions
+     * 
+     * CheckMacaroonPermissions checks whether a request follows the constraints imposed 
+     * on the macaroon and that the macaroon is authorized to follow the provided permissions.
+     * 
+     * @link https://api.lightning.community/#v1-macaroon-checkpermissions
+     * 
+     * @param string                        $macaroon       Required. The macaroon to check.
+     * @param MacaroonPermission[]          $permissions    Required. The permissions to check.
+     * @param string                        $fullMethod     Required. The full method name of the RPC call.
+     * 
+     * @return CheckMacPermResponse
+     * 
+     * @throws Exception
+     */
+    public function checkMacaroonPermissions(
+        string $macaroon,
+        array $permissions,
+        string $fullMethod
+    ): CheckMacPermResponse {
+        try {
+            return new CheckMacPermResponse($this->call(
+                method: Endpoint::LIGHTNING_CHECKMACPERM->getMethod(),
+                endpoint: Endpoint::LIGHTNING_CHECKMACPERM->getPath(),
+                data: [
+                    'macaroon' => $macaroon,
+                    'permissions' => $permissions,
+                    'fullMethod' => $fullMethod,
+                ]
             ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());

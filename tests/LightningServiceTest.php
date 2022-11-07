@@ -3,8 +3,10 @@
 use UtxoOne\LndPhp\Tests\BaseTest;
 use UtxoOne\LndPhp\Models\Lightning\ChainList;
 use UtxoOne\LndPhp\Models\Lightning\Amount;
+use UtxoOne\LndPhp\Models\Lightning\MacaroonPermission;
 use UtxoOne\LndPhp\Models\Lightning\NodeFeatureList;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
+use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Services\LightningService;
 
@@ -22,7 +24,6 @@ final class LightningServiceTest extends BaseTest
             port: $this->port,
             macaroonPath: $this->macaroonPath,
             tlsCertificatePath: $this->tlsCertificatePath,
-            apiVersion: 'v1',
             useSsl: true,
         );
     }
@@ -80,13 +81,24 @@ final class LightningServiceTest extends BaseTest
         //$this->lightningService->batchOpenChannels();
     }
 
+    /** @group bakeMacaroon */
     public function testItCanBakeMacaroon(): void
     {
-        $this->markTestIncomplete('requires testnet');
-        //$this->lightningService->bakeMacaroon();
+        $macaroonPermission = new MacaroonPermission([
+            'entity' => 'info',
+            'action' => 'read',
+        ]);
+
+        $macaroon = $this->lightningService->bakeMacaroon(
+            permissions: [$macaroonPermission->data],
+            rootKeyId: 23452352345234,
+        );
+
+        $this->assertInstanceOf(BakeMacaroonResponse::class, $macaroon);
+        $this->assertIsString($macaroon->getMacaroon());
     }
 
-    public function testItCanResponseToChannelAcceptor(): void
+    public function testItCanRespondToChannelAcceptor(): void
     {
         $this->markTestIncomplete('requires testnet');
         //$this->lightningService->responseToChannelAcceptor();
@@ -127,5 +139,30 @@ final class LightningServiceTest extends BaseTest
         $this->assertIsString($channelBalance->getUnsettledRemoteBalance()->getMsat());
     }
 
-    
+    /** @group checkMacaroonPermissions */
+    public function testItCanCheckMacaroonPermissions(): void
+    {
+        $this->markTestIncomplete('fails: cannot determine data format of binary-encoded macaroon');
+
+        // Create a macroon permission object
+        $macaroonPermission = new MacaroonPermission([
+            'entity' => 'info',
+            'action' => 'read',
+        ]);
+
+        // Bake a macraoon with the permissions we want to check
+        $macaroon = $this->lightningService->bakeMacaroon(
+            permissions: [$macaroonPermission->data],
+            rootKeyId: 23452352345234,
+        );
+
+        // Check the permissions
+        $permissions = $this->lightningService->checkMacaroonPermissions(
+            macaroon: $macaroon->getMacaroon(),
+            permissions: [$macaroonPermission->data],
+            fullMethod: 'lnrpc.Lightning/CheckMacaroonPermissions',
+        );
+
+        $this->dd($permissions);
+    }
 }
