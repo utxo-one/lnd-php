@@ -1,6 +1,8 @@
-## PHP-LND
+## PHP-LND (WORK IN PROGRESS)
 
 A complete PHP SDK for LND implementations of the Lightning Network
+
+Note: Do not use! It is incomplete.
 
 ### Usage
 
