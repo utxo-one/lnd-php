@@ -127,6 +127,19 @@ enum Endpoint: string {
      */
     case LIGHTNING_CHECKMACPERM = 'POST v1/macaroon/checkpermissions';
 
+    /**
+     * Close Channel
+     * 
+     * lncli: closechannel CloseChannel attempts to close an active channel identified by its channel outpoint (ChannelPoint).
+     * The actions of this method can additionally be augmented to attempt a force close after a timeout period in the case of an inactive peer. 
+     * If a non-force close (cooperative closure) is requested, then the user can optionally specify either a target number of blocks until the closure transaction is confirmed (the target_conf) or a manual fee rate to us for the closure transaction (sat_per_byte).
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-channels
+     */
+    case LIGHTNING_CLOSECHANNEL = 'DELETE v1/channels';
+
     public function getMethod(): string 
     {
         return explode(' ', $this->value)[0];

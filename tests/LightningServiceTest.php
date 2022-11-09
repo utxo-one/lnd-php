@@ -3,6 +3,7 @@
 use UtxoOne\LndPhp\Tests\BaseTest;
 use UtxoOne\LndPhp\Models\Lightning\ChainList;
 use UtxoOne\LndPhp\Models\Lightning\Amount;
+use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
 use UtxoOne\LndPhp\Models\Lightning\MacaroonPermission;
 use UtxoOne\LndPhp\Models\Lightning\NodeFeatureList;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
@@ -144,25 +145,63 @@ final class LightningServiceTest extends BaseTest
     {
         $this->markTestIncomplete('fails: cannot determine data format of binary-encoded macaroon');
 
-        // Create a macroon permission object
-        $macaroonPermission = new MacaroonPermission([
+        // Create 3 macaroon permission objects
+        $macaroonPermission1 = new MacaroonPermission([
             'entity' => 'info',
             'action' => 'read',
         ]);
 
+        $macaroonPermission2 = new MacaroonPermission([
+            'entity' => 'offchain',
+            'action' => 'read',
+        ]);
+
+        $macaroonPermission3 = new MacaroonPermission([
+            'entity' => 'onchain',
+            'action' => 'read',
+        ]);
+
+        $macaroonPermissions = [
+            $macaroonPermission1->data,
+            $macaroonPermission2->data,
+            $macaroonPermission3->data,
+        ];
+
         // Bake a macraoon with the permissions we want to check
         $macaroon = $this->lightningService->bakeMacaroon(
-            permissions: [$macaroonPermission->data],
+            permissions: $macaroonPermissions,
             rootKeyId: 23452352345234,
         );
 
         // Check the permissions
         $permissions = $this->lightningService->checkMacaroonPermissions(
             macaroon: $macaroon->getMacaroon(),
-            permissions: [$macaroonPermission->data],
+            permissions: $macaroonPermissions,
             fullMethod: 'lnrpc.Lightning/CheckMacaroonPermissions',
         );
+    }
 
-        $this->dd($permissions);
+    /** @group closeChannel */
+    public function testItCanCloseChannel(): void
+    {
+        $this->markTestIncomplete('requires testnet');
+
+        // Create a ChannelPoint object
+        $channelPoint = new ChannelPoint([
+            'funding_txid_bytes' => 'fundingTxidBytes',
+            'funding_txid_str' => 'fundingTxidStr',
+            'output_index' => 0,
+        ]);
+
+        $close = $this->lightningService->closeChannel(
+            channelPoint: $channelPoint,
+            force: false,
+            targetConf: 0,
+            satPerVbyte: '1',
+            deliveryAddress: 'deliveryAddress',
+            maxFeePerVbyte: '1',
+        );
+
+        $this->dd($close);
     }
 }

@@ -120,6 +120,14 @@ class Lnd
         curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, 2);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
 
+        match ($method) {
+            'GET' => curl_setopt($curlHandle, CURLOPT_HTTPGET, true),
+            'POST' => curl_setopt($curlHandle, CURLOPT_POST, true),
+            'PUT' => curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT'),
+            'DELETE' => curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE'),
+            default => throw new Exception('Invalid HTTP Method'),
+        };
+
         if ($data) {
             curl_setopt($curlHandle, CURLOPT_POSTFIELDS, json_encode($data));
         }

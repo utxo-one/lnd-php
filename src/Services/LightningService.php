@@ -13,6 +13,7 @@ use UtxoOne\LndPhp\Responses\Lightning\BatchOpenChannelResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelAcceptResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\CheckMacPermResponse;
+use UtxoOne\LndPhp\Responses\Lightning\CloseChannelResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -448,6 +449,66 @@ class LightningService extends Lnd
                     'macaroon' => $macaroon,
                     'permissions' => $permissions,
                     'fullMethod' => $fullMethod,
+                ]
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * CloseChannel
+     * 
+     * CloseChannel attempts to close an active channel identified by its channel outpoint (ChannelPoint). 
+     * The actions of this method can additionally be augmented to attempt a force close after a timeout 
+     * period in the case of an inactive peer. If a non-force close (cooperative closure) is requested, 
+     * then the user can specify either a target number of blocks until the closure transaction is confirmed, 
+     * or a manual fee rate. If neither are specified, then a default lax, block confirmation target is used.
+     * 
+     * @link https://api.lightning.community/#v1-channels
+     * 
+     * @param ChannelPoint      $channelPoint       Required. The ChannelPoint of the channel to close.
+     * @param boolean           $force              Required. If true, then the channel will be closed forcefully.
+     * @param int               $targetConf         Required. The number of blocks that the closure transaction should be confirmed by.
+     * @param string            $satPerVbyte        Required. A manual fee rate set in sat/byte that should be used when crafting the closure transaction.
+     * @param string            $deliveryAddress    Required. The address to send any funds remaining within the channel to.
+     * @param string            $maxFeePerVbyte     Required. If true, then the closure transaction will be marked non-broadcastable.
+     * 
+     * @return CloseChannelResponse
+     * 
+     * @throws Exception
+     */
+    public function closeChannel(
+        ChannelPoint $channelPoint,
+        bool $force,
+        int $targetConf,
+        string $satPerVbyte,
+        string $deliveryAddress,
+        string $maxFeePerVbyte
+    ): CloseChannelResponse {
+        try {
+            $query = http_build_query([
+                'force' => $force,
+                'target_conf' => $targetConf,
+                'sat_per_vbyte' => $satPerVbyte,
+                'delivery_address' => $deliveryAddress,
+                'max_fee_per_vbyte' => $maxFeePerVbyte,
+            ]);
+
+            $endpoint = Endpoint::LIGHTNING_CLOSECHANNEL->getPath() .
+                '/' . $channelPoint->getFundingTxidStr() . '/' . $channelPoint->getOutputIndex() .
+                '?' . $query;
+
+            return new CloseChannelResponse($this->call(
+                method: Endpoint::LIGHTNING_CLOSECHANNEL->getMethod(),
+                endpoint: $endpoint,
+                data: [
+                    'channel_point' => $channelPoint,
+                    'force' => $force,
+                    'target_conf' => $targetConf,
+                    'sat_per_vbyte' => $satPerVbyte,
+                    'delivery_address' => $deliveryAddress,
+                    'max_fee_per_vbyte' => $maxFeePerVbyte,
                 ]
             ));
         } catch (Exception $e) {
