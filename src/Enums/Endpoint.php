@@ -140,6 +140,17 @@ enum Endpoint: string {
      */
     case LIGHTNING_CLOSECHANNEL = 'DELETE v1/channels';
 
+    /**
+     * Closed Channels
+     * 
+     * lncli: closedchannels ClosedChannels returns a description of all the closed channels that this node was a participant in.
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-channels-closed
+     */
+    case LIGHTNING_CLOSEDCHANNELS = 'GET v1/channels/closed';
+
     public function getMethod(): string 
     {
         return explode(' ', $this->value)[0];

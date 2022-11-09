@@ -5,6 +5,7 @@ namespace UtxoOne\LndPhp\Services;
 use UtxoOne\LndPhp\Enums\Endpoint;
 use Exception;
 use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
+use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummaryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
@@ -510,6 +511,53 @@ class LightningService extends Lnd
                     'delivery_address' => $deliveryAddress,
                     'max_fee_per_vbyte' => $maxFeePerVbyte,
                 ]
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * ClosedChannels
+     * 
+     * ClosedChannels returns a description of all the closed channels that this node was a participant in.
+     * 
+     * @link https://api.lightning.community/#v1-channels-closed
+     * 
+     * @param boolean   $cooperative    Required. If true, then only cooperative close channels will be returned.
+     * @param boolean   $localForce     Required. If true, then only channels that were force closed by the local node will be returned.
+     * @param boolean   $remoteForce    Required. If true, then only channels that were force closed by the remote node will be returned.
+     * @param boolean   $breach         Required. If true, then only channels that were breached by the remote node will be returned.
+     * @param boolean   $fundingCanceled    Required. If true, then only channels that were canceled by the remote node will be returned.
+     * @param boolean   $abandoned      Required. If true, then only channels that were abandoned by the local node will be returned.
+     * 
+     * @return ChannelCloseSummaryList
+     * 
+     * @throws Exception
+     */
+    public function closedChannels(
+        bool $cooperative,
+        bool $localForce,
+        bool $remoteForce,
+        bool $breach,
+        bool $fundingCanceled,
+        bool $abandoned
+    ): ChannelCloseSummaryList {
+        try {
+            $query = http_build_query([
+                'cooperative' => $cooperative,
+                'local_force' => $localForce,
+                'remote_force' => $remoteForce,
+                'breach' => $breach,
+                'funding_canceled' => $fundingCanceled,
+                'abandoned' => $abandoned,
+            ]);
+
+            $endpoint = Endpoint::LIGHTNING_CLOSEDCHANNELS->getPath() . '?' . $query;
+
+            return new ChannelCloseSummaryList($this->call(
+                method: Endpoint::LIGHTNING_CLOSEDCHANNELS->getMethod(),
+                endpoint: $endpoint,
             ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());

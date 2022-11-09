@@ -103,7 +103,7 @@ class Lnd
      * 
      * @throws Exception
      */
-    public function call(string $method, string $endpoint, ?array $data): array
+    public function call(string $method, string $endpoint, ?array $data = null): array
     {
         $url = $this->host . '/' . $endpoint;
 

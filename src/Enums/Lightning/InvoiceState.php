@@ -4,13 +4,12 @@ namespace UtxoOne\LndPhp\Enums\Lightning;
 
 use UtxoOne\LndPhp\Traits\EnumHelper;
 
-/** @todo Get the actual enums */
-class InvoiceState
-{
+enum InvoiceState: int {
+
     use EnumHelper;
 
-    public const OPEN = 'OPEN';
-    public const SETTLED = 'SETTLED';
-    public const CANCELED = 'CANCELED';
-    public const ACCEPTED = 'ACCEPTED';
+    case OPEN = 0;
+    case SETTLED = 1;
+    case CANCELED = 2;
+    case ACCEPTED = 3;
 }

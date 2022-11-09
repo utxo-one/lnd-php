@@ -1,12 +1,20 @@
 <?php
 
+use UtxoOne\LndPhp\Enums\Lightning\ClosureType;
+use UtxoOne\LndPhp\Enums\Lightning\Initiator;
+use UtxoOne\LndPhp\Enums\Lightning\ResolutionOutcome;
+use UtxoOne\LndPhp\Enums\Lightning\ResolutionType;
 use UtxoOne\LndPhp\Tests\BaseTest;
 use UtxoOne\LndPhp\Models\Lightning\ChainList;
 use UtxoOne\LndPhp\Models\Lightning\Amount;
+use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummary;
+use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummaryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
 use UtxoOne\LndPhp\Models\Lightning\MacaroonPermission;
 use UtxoOne\LndPhp\Models\Lightning\NodeFeatureList;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
+use UtxoOne\LndPhp\Models\Lightning\OutPoint;
+use UtxoOne\LndPhp\Models\Lightning\ResolutionList;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Services\LightningService;
@@ -203,5 +211,56 @@ final class LightningServiceTest extends BaseTest
         );
 
         $this->dd($close);
+    }
+
+    /** @group closedChannels */
+    public function testItCanGetClosedChannels(): void
+    {
+        //$this->markTestIncomplete('requires testnet');
+
+        $closedChannels = $this->lightningService->closedChannels(
+            cooperative: true,
+            localForce: true,
+            remoteForce: true,
+            breach: true,
+            fundingCanceled: true,
+            abandoned: true,
+        );
+
+        $this->assertInstanceOf(ChannelCloseSummaryList::class, $closedChannels);
+
+        $this->assertIsArray($closedChannels);
+        foreach ($closedChannels as $channel) {
+            $this->assertInstanceOf(ChannelCloseSummary::class, $channel);
+            $this->assertIsString($channel->getChannelPoint());
+            $this->assertIsString($channel->getChanId());
+            $this->assertIsString($channel->getChainHash());
+            $this->assertIsString($channel->getClosingTxHash());
+            $this->assertIsString($channel->getRemotePubkey());
+            $this->assertIsInt($channel->getCapacity());
+            $this->assertIsInt($channel->getCloseHeight());
+            $this->assertIsInt($channel->getSettledBalance());
+            $this->assertIsInt($channel->getTimeLockedBalance());
+            $this->assertInstanceOf(ClosureType::class, $channel->getCloseType());
+            $this->assertInstanceOf(Initiator::class, $channel->getOpenInitiator());
+            $this->assertInstanceOf(Initiator::class, $channel->getCloseInitiator());
+
+            $this->assertInstanceOf(ResolutionList::class, $channel->getResolutions());
+            foreach ($channel->getResolutions() as $resolution) {
+                $this->assertInstanceOf(Resolution::class, $resolution);
+                $this->assertInstanceOf(ResolutionType::class, $resolution->getResolutionType());
+                $this->assertInstanceOf(ResolutionOutcome::class, $resolution->getOutcome());
+                $this->assertInstanceOf(OutPoint::class, $resolution->getOutpoint());
+                $this->assertIsInt($resolution->getAmountSat());
+                $this->assertIsString($resolution->getSweepTxid());                
+            }
+
+            $this->assertIsArray($channel->getAliasScids());
+            foreach ($channel->getAliasScids() as $aliasScid) {
+                $this->assertIsInt($aliasScid);
+            }
+
+            $this->assertIsInt($channel->getZeroConfConfirmedScid());           
+        }
     }
 }
