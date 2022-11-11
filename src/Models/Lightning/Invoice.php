@@ -91,7 +91,7 @@ class Invoice
      * 
      * @return bool
      */
-    public function getSettled(): bool
+    public function isSettled(): bool
     {
         return $this->data['settled'];
     }
