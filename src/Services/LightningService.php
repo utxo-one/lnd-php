@@ -7,6 +7,7 @@ use Exception;
 use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
 use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummaryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
+use UtxoOne\LndPhp\Models\Lightning\Invoice;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
@@ -15,6 +16,7 @@ use UtxoOne\LndPhp\Responses\Lightning\ChannelAcceptResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\CheckMacPermResponse;
 use UtxoOne\LndPhp\Responses\Lightning\CloseChannelResponse;
+use UtxoOne\LndPhp\Responses\Lightning\SendCoinsResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -72,11 +74,11 @@ class LightningService extends Lnd
      *                                          and will also be set in the description field of the encoded 
      *                                          payment request if the description_hash field is not being used.
      * 
-     * @param string        $rPreimage          Required. The hex-encoded preimage (32 byte) which will allow 
+     * @param string        $rPreimage          Optional. The hex-encoded preimage (32 byte) which will allow 
      *                                          settling an incoming HTLC payable to this preimage. 
      *                                          When using REST, this field must be encoded as base64.
      * 
-     * @param string        $rHash              Required. The hash of the preimage. When using REST, 
+     * @param string        $rHash              Optional. The hash of the preimage. When using REST, 
      *                                          this field must be encoded as base64. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
@@ -86,46 +88,46 @@ class LightningService extends Lnd
      * @param int           $valueMsat          Required. The value of this invoice in millisatoshis. 
      *                                          The fields value and value_msat are mutually exclusive.
      * 
-     * @param int           $creationDate       Required. When this invoice was created. 
+     * @param int           $creationDate       Optional. When this invoice was created. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $settleDate         Required. When this invoice was settled. 
+     * @param int           $settleDate         Optional. When this invoice was settled. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $creationDate       Required. When this invoice was created. 
+     * @param int           $creationDate       Optional. When this invoice was created. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param string        $paymentRequest     Required. A bare-bones invoice for a payment within the Lightning Network. 
+     * @param string        $paymentRequest     Optional. A bare-bones invoice for a payment within the Lightning Network. 
      *                                          With the details of the invoice, the sender has all the data necessary to 
      *                                          send a payment to the recipient. Note: Output only, don't specify for creating an invoice.
      * 
-     * @param string        $descriptionHash    Required. Hash (SHA-256) of a description of the payment. 
+     * @param string        $descriptionHash    Optional. Hash (SHA-256) of a description of the payment. 
      *                                          Used if the description of payment (memo) is too long to naturally 
      *                                          fit within the description field of an encoded payment request. 
      *                                          When using REST, this field must be encoded as base64.
      * 
-     * @param int           $expiry             Required. Payment request expiry time in seconds. Default is 3600 (1 hour).
+     * @param int           $expiry             Optional. Payment request expiry time in seconds. Default is 3600 (1 hour).
      * 
-     * @param string        $fallbackAddr       Required. Fallback on-chain address.
+     * @param string        $fallbackAddr       Optional. Fallback on-chain address.
      * 
-     * @param int           $cltvExpiry         Required. Delta to use for the time-lock of the CLTV extended to the final hop.
+     * @param int           $cltvExpiry         Optional. Delta to use for the time-lock of the CLTV extended to the final hop.
      * 
-     * @param array         $routeHints         Required. Route hints that can each be individually used to assist 
+     * @param array         $routeHints         Optional. Route hints that can each be individually used to assist 
      *                                          in reaching the invoice's destination.
      * 
-     * @param bool          $private            Required. Whether this invoice should include routing hints for private channels.
+     * @param bool          $private            Optional. Whether this invoice should include routing hints for private channels.
      * 
-     * @param int           $addIndex           Required. The "add" index of this invoice. Each newly created invoice will increment 
+     * @param int           $addIndex           Optional. The "add" index of this invoice. Each newly created invoice will increment 
      *                                          this index making it monotonically increasing. Callers to the SubscribeInvoices call 
      *                                          can use this to instantly get notified of all added invoices with an add_index greater 
      *                                          than this one. Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $settleIndex        Required. The "settle" index of this invoice. Each newly settled invoice will increment 
+     * @param int           $settleIndex        Optional. The "settle" index of this invoice. Each newly settled invoice will increment 
      *                                          this index making it monotonically increasing. Callers to the SubscribeInvoices call 
      *                                          can use this to instantly get notified of all settled invoices with an settle_index greater 
      *                                          than this one. Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $amtPaidSat         Required. The amount that was accepted for this invoice, in satoshis. 
+     * @param int           $amtPaidSat         Optional. The amount that was accepted for this invoice, in satoshis. 
      *                                          This will ONLY be set if this invoice has been settled. 
      *                                          We provide this field as if the invoice was created with a zero value, 
      *                                          then we need to record what amount was ultimately accepted. 
@@ -133,32 +135,32 @@ class LightningService extends Lnd
      *                                          was specified in the original invoice. So we'll record that here as well.
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param int           $amtPaidMsat        Required. The amount that was accepted for this invoice, in millisatoshis. 
+     * @param int           $amtPaidMsat        Optional. The amount that was accepted for this invoice, in millisatoshis. 
      *                                          This will ONLY be set if this invoice 
      *                                          has been settled. We provide this field as if the invoice was created with a zero value, 
      *                                          then we need to record what amount was ultimately accepted. 
      *                                          Additionally, it's possible that the sender paid MORE that was specified in the original invoice. 
      *                                          So we'll record that here as well. Note: Output only, don't specify for creating an invoice.
      * 
-     * @param InvoiceState  $state              Required. The state the invoice is in. 
+     * @param InvoiceState  $state              Optional. The state the invoice is in. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param InvoiceHtlc[] $htlcs              Required. List of HTLCs paying to this invoice. 
+     * @param InvoiceHtlc[] $htlcs              Optional. List of HTLCs paying to this invoice. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param array         $features           Required. List of features advertised on the invoice. 
+     * @param array         $features           Optional. List of features advertised on the invoice. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param bool          $isKeysend          Required. Whether this invoice was a keysend invoice. 
+     * @param bool          $isKeysend          Optional. Whether this invoice was a keysend invoice. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param string        $paymentAddr        Required. The payment address of this invoice. This value will be used in MPP payments, 
+     * @param string        $paymentAddr        Optional. The payment address of this invoice. This value will be used in MPP payments, 
      *                                          and also for newer invoices that always require the MPP payload for added end-to-end security. 
      *                                          Note: Output only, don't specify for creating an invoice.
      * 
-     * @param bool          $isAmp              Required. Signals whether or not this is an AMP invoice.
+     * @param bool          $isAmp              Optional. Signals whether or not this is an AMP invoice.
      * 
-     * @param array         $ampInvoiceState    Experimental. Maps a 32-byte hex-encoded set ID to the sub-invoice AMP state for the given set ID. 
+     * @param array         $ampInvoiceState    Optional. Maps a 32-byte hex-encoded set ID to the sub-invoice AMP state for the given set ID. 
      *                                          This field is always populated for AMP invoices, and can be used along side LookupInvoice to obtain 
      *                                          the HTLC information related to a given sub-invoice. Note: Output only, don't specify for creating an invoice.
      * 
@@ -167,32 +169,31 @@ class LightningService extends Lnd
      * @throws Exception
      */
     public function addInvoice(
-        string $receipt,
-        string $rPreimage,
-        string $rHash,
-        int $value,
-        int $valueMsat,
-        int $creationDate,
-        int $settleDate,
-        string $paymentRequest,
-        string $descriptionHash,
-        int $expiry,
-        string $fallbackAddr,
-        int $cltvExpiry,
-        array $routeHints,
-        bool $private,
-        int $addIndex,
-        int $settleIndex,
-        int $amtPaidSat,
-        int $amtPaidMsat,
-        InvoiceState $state,
-        array $htlcs,
-        array $features,
-        bool $isKeysend,
-        string $paymentAddr,
-        bool $isAmp,
-        array $ampInvoiceState = null,
-        ?string $memo,
+        ?string $rPreimage = null,
+        ?string $rHash = null,
+        ?int $value = null,
+        ?int $valueMsat = null,
+        ?int $creationDate = null,
+        ?int $settleDate = null,
+        ?string $paymentRequest = null,
+        ?string $descriptionHash = null,
+        ?int $expiry = null,
+        ?string $fallbackAddr = null,
+        ?int $cltvExpiry = null,
+        ?array $routeHints = null,
+        ?bool $private = null,
+        ?int $addIndex = null,
+        ?int $settleIndex = null,
+        ?int $amtPaidSat = null,
+        ?int $amtPaidMsat = null,
+        ?InvoiceState $state = null,
+        ?array $htlcs = null,
+        ?array $features = null,
+        ?bool $isKeysend = null,
+        ?string $paymentAddr = null,
+        ?bool $isAmp = null,
+        ?array $ampInvoiceState = null,
+        ?string $memo = null,
     ): AddInvoiceResponse {
 
         try {
@@ -200,7 +201,6 @@ class LightningService extends Lnd
                 method: Endpoint::LIGHTNING_ADDINVOICE->getMethod(),
                 endpoint: Endpoint::LIGHTNING_ADDINVOICE->getPath(),
                 data: [
-                    'receipt' => $receipt,
                     'r_preimage' => $rPreimage,
                     'r_hash' => $rHash,
                     'value' => $value,
@@ -558,6 +558,84 @@ class LightningService extends Lnd
             return new ChannelCloseSummaryList($this->call(
                 method: Endpoint::LIGHTNING_CLOSEDCHANNELS->getMethod(),
                 endpoint: $endpoint,
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * LookupInvoice
+     * 
+     * LookupInvoice attempts to look up an invoice according to its payment hash. The passed payment hash
+     * *must* be exactly 32 bytes, if not, an error is returned.
+     * 
+     * @link https://api.lightning.community/#v1-invoice
+     * 
+     * @param string    $rHash   Required. The payment hash to look for, encoded as a hex string.
+     * 
+     * @return Invoice
+     * 
+     * @throws Exception
+     */
+    public function lookupInvoice(string $rHash): Invoice {
+        $rHash = bin2hex(base64_decode($rHash));
+        try {
+           return new Invoice($this->call(
+                method: Endpoint::LIGHTNING_LOOKUPINVOICE->getMethod(),
+                endpoint: Endpoint::LIGHTNING_LOOKUPINVOICE->getPath() . '/' . $rHash,
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * SendCoins
+     * 
+     * SendCoins executes a request to send coins to a particular address. Unlike SendMany, this RPC call only
+     * allows creating a single output at a time. If neither target_conf or sat_per_byte are set, then a
+     * lax, block confirmation target is used.
+     * 
+     * @link https://api.lightning.community/#v1-transactions
+     * 
+     * @param string       $addr                    Required. The address to send coins to.
+     * @param string       $amount                  Required. The amount to send expressed in satoshis.
+     * @param int          $targetConf              Required. The number of blocks that the transaction should be confirmed by.
+     * @param string       $satPerVbyte             Required. A manual fee rate set in sat/byte that should be used when crafting the transaction.
+     * @param bool         $sendAll                 Required. If true, then the entire wallet balance will be sent to the address.
+     * @param string       $label                   Required. A label to assign to the transaction.
+     * @param int          $minConfs                Required. The minimum number of confirmations each of the referenced outputs must have.
+     * @param bool         $spendUnconfirmed        Required. Whether unconfirmed outputs should be used as inputs for the transaction.
+     * 
+     * @return SendCoinsResponse
+     * 
+     * @throws Exception
+     */
+    public function sendCoins(
+        string $addr,
+        string $amount,
+        int $targetConf = null,
+        string $satPerVbyte = null,
+        bool $sendAll = false,
+        int $minConfs = null,
+        bool $spendUnconfirmed = false,
+        string $label = null,
+    ): SendCoinsResponse {
+        try {
+            return new SendCoinsResponse($this->call(
+                method: Endpoint::LIGHTNING_SENDCOINS->getMethod(),
+                endpoint: Endpoint::LIGHTNING_SENDCOINS->getPath(),
+                data: [
+                    'addr' => $addr,
+                    'amount' => $amount,
+                    'target_conf' => $targetConf,
+                    'sat_per_byte' => $satPerVbyte,
+                    'send_all' => $sendAll,
+                    'label' => $label,
+                    'min_confs' => $minConfs,
+                    'spend_unconfirmed' => $spendUnconfirmed,
+                ]
             ));
         } catch (Exception $e) {
             throw new Exception($e->getMessage());

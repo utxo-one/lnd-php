@@ -1,5 +1,7 @@
 /vendor/
 /tests/.env
-admin.macaroon
-tls.cert
+admin.mainnet.macaroon
+admin.testnet.macaroon
+tls.mainnet.cert
+tls.testnet.cert
 .phpunit.result.cache

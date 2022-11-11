@@ -2,6 +2,7 @@
 
 use UtxoOne\LndPhp\Enums\Lightning\ClosureType;
 use UtxoOne\LndPhp\Enums\Lightning\Initiator;
+use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
 use UtxoOne\LndPhp\Enums\Lightning\ResolutionOutcome;
 use UtxoOne\LndPhp\Enums\Lightning\ResolutionType;
 use UtxoOne\LndPhp\Tests\BaseTest;
@@ -10,13 +11,19 @@ use UtxoOne\LndPhp\Models\Lightning\Amount;
 use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummary;
 use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummaryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
+use UtxoOne\LndPhp\Models\Lightning\Invoice;
+use UtxoOne\LndPhp\Models\Lightning\InvoiceFeaturesEntry;
+use UtxoOne\LndPhp\Models\Lightning\InvoiceFeaturesEntryList;
+use UtxoOne\LndPhp\Models\Lightning\InvoiceHtlcList;
 use UtxoOne\LndPhp\Models\Lightning\MacaroonPermission;
 use UtxoOne\LndPhp\Models\Lightning\NodeFeatureList;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Models\Lightning\OutPoint;
 use UtxoOne\LndPhp\Models\Lightning\ResolutionList;
+use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
+use UtxoOne\LndPhp\Responses\Lightning\SendCoinsResponse;
 use UtxoOne\LndPhp\Services\LightningService;
 
 final class LightningServiceTest extends BaseTest
@@ -80,8 +87,69 @@ final class LightningServiceTest extends BaseTest
 
     public function testItCanAddInvoice(): void
     {
-        $this->markTestIncomplete('requires testnet');
-        //$this->lightningService->addInvoice();
+        $invoice = $this->lightningService->addInvoice(
+            value: 1000,
+            memo: 'test invoice',
+            expiry: 36000,
+        );
+
+        $this->assertInstanceOf(AddInvoiceResponse::class, $invoice);
+        $this->assertIsString($invoice->getRHash());
+        $this->assertIsString($invoice->getPaymentRequest());
+        $this->assertIsInt($invoice->getAddIndex());
+        $this->assertIsString($invoice->getPaymentAddr());
+    }
+
+    /** @group lookupInvoice */
+    public function testItCanLookupInvoice(): void
+    {
+        $invoice = $this->lightningService->addInvoice(
+            value: 1000,
+            memo: 'test invoice',
+            expiry: 36000,
+        );
+
+        $invoice = $this->lightningService->lookupInvoice(
+            rHash: $invoice->getRHash(),
+        );
+
+        $this->assertInstanceOf(Invoice::class, $invoice);
+        $this->assertIsString($invoice->getMemo());
+        $this->assertIsString($invoice->getRHash());
+        $this->assertIsString($invoice->getRPreimage());
+        $this->assertIsInt($invoice->getValue());
+        $this->assertIsInt($invoice->getSettleDate());
+        $this->assertIsInt($invoice->getCreationDate());
+        $this->assertIsInt($invoice->getSettleIndex());
+        $this->assertIsInt($invoice->getAddIndex());
+        $this->assertIsString($invoice->getPaymentRequest());
+        $this->assertIsInt($invoice->getExpiry());
+        $this->assertIsInt($invoice->getAmtPaid());
+        $this->assertSame(InvoiceState::OPEN, $invoice->getState());
+        $this->assertIsString($invoice->getPaymentAddr());
+
+        $this->assertInstanceOf(InvoiceHtlcList::class, $invoice->getHtlcs());
+        foreach ($invoice->getHtlcs() as $htlc) {
+            $this->assertIsString($htlc->getChanId());
+            $this->assertIsInt($htlc->getHtlcIndex());
+            $this->assertIsInt($htlc->getAmtMsat());
+            $this->assertIsInt($htlc->getAcceptHeight());
+            $this->assertIsInt($htlc->getAcceptTime());
+            $this->assertIsInt($htlc->getResolveTime());
+            $this->assertIsInt($htlc->getExpiryHeight());
+            $this->assertIsInt($htlc->getState());
+            $this->assertIsString($htlc->getCustomRecords());
+        }
+
+        $this->assertInstanceOf(InvoiceFeaturesEntryList::class, $invoice->getFeatures());
+        foreach ($invoice->getFeatures() as $feature) {
+            $this->assertIsString($feature->getName());
+            $this->assertIsBool($feature->isRequired());
+            $this->assertIsBool($feature->isKnown());
+        }
+
+        $this->assertIsBool($invoice->isKeysend());
+        $this->assertIsBool($invoice->isAmp());
     }
 
     public function testItCanBatchOpenChannels(): void
@@ -216,7 +284,7 @@ final class LightningServiceTest extends BaseTest
     /** @group closedChannels */
     public function testItCanGetClosedChannels(): void
     {
-        //$this->markTestIncomplete('requires testnet');
+        //$this->markTestIncomplete('requires closed channels to work');
 
         $closedChannels = $this->lightningService->closedChannels(
             cooperative: true,
@@ -229,7 +297,6 @@ final class LightningServiceTest extends BaseTest
 
         $this->assertInstanceOf(ChannelCloseSummaryList::class, $closedChannels);
 
-        $this->assertIsArray($closedChannels);
         foreach ($closedChannels as $channel) {
             $this->assertInstanceOf(ChannelCloseSummary::class, $channel);
             $this->assertIsString($channel->getChannelPoint());
@@ -262,5 +329,19 @@ final class LightningServiceTest extends BaseTest
 
             $this->assertIsInt($channel->getZeroConfConfirmedScid());           
         }
+    }
+
+    /** @group sendCoins */
+    public function testItCanSendCoins(): void
+    {
+        $tmpAddress = 'tb1qxp6sq0ymwdd35yxcgje6yrqe2ls6wfnnyxnmgc';
+
+        $transaction = $this->lightningService->sendCoins(
+            addr: $tmpAddress,
+            amount: '2000',
+        );
+
+        $this->assertInstanceOf(SendCoinsResponse::class, $transaction);
+        $this->assertIsString($transaction->getTxid());
     }
 }

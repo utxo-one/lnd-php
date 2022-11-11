@@ -2,7 +2,7 @@
 
 namespace UtxoOne\LndPhp\Models\Lightning;
 
-class NodeFeature {
+class Feature {
 
     public function __construct(private array $data)
     {

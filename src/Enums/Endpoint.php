@@ -151,6 +151,31 @@ enum Endpoint: string {
      */
     case LIGHTNING_CLOSEDCHANNELS = 'GET v1/channels/closed';
 
+    /**
+     * Lookup Invoice
+     * 
+     * lncli: lookupinvoice LookupInvoice attempts to look up an invoice according to its payment hash.
+     * 
+     * @group Lightning
+     * 
+     * @url https://api.lightning.community/#v1-invoice
+     */
+    case LIGHTNING_LOOKUPINVOICE = 'GET v1/invoice';
+
+    /**
+     * Send Coins
+     * 
+     * lncli: sendcoins SendCoins executes a request to send coins to a particular address. 
+     * Unlike SendMany, this RPC call only allows creating a single output at a time. 
+     * If neither target_conf, or sat_per_vbyte are set, then the internal wallet will 
+     * consult its fee model to determine a fee for the default confirmation target.
+     * 
+     * @group Lightning
+     * 
+     * https://api.lightning.community/#v1-transactions
+     */
+    case LIGHTNING_SENDCOINS = 'POST v1/transactions';
+
     public function getMethod(): string 
     {
         return explode(' ', $this->value)[0];

@@ -28,4 +28,14 @@ trait EnumHelper
         }
         throw new \ValueError("$value is not a valid backing value for enum " . self::class );
     }
+
+    public static function fromName(string $name): self
+    {
+        foreach (self::cases() as $case) {
+            if($name === $case->name ){
+                return $case;
+            }
+        }
+        throw new \ValueError("$name is not a valid name for enum " . self::class );
+    }
 }
