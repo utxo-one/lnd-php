@@ -2,7 +2,8 @@
 
 namespace UtxoOne\LndPhp\Enums;
 
-enum Endpoint: string {
+enum Endpoint: string
+{
 
     /**
      * List Aliases
@@ -76,7 +77,7 @@ enum Endpoint: string {
      * 
      * @url https://api.lightning.community/#v1-channels-batch
      */
-     case LIGHTNING_BATCHOPENCHANNEL = 'POST v1/channels/batch';
+    case LIGHTNING_BATCHOPENCHANNEL = 'POST v1/channels/batch';
 
     /**
      * Channel Acceptor
@@ -172,16 +173,27 @@ enum Endpoint: string {
      * 
      * @group Lightning
      * 
-     * https://api.lightning.community/#v1-transactions
+     * @url https://api.lightning.community/#v1-transactions
      */
     case LIGHTNING_SENDCOINS = 'POST v1/transactions';
 
-    public function getMethod(): string 
+    /**
+     * Next Addr
+     * 
+     * NextAddr returns the next unused address within the wallet.
+     * 
+     * @group WalletKit
+     * 
+     * @url https://api.lightning.community/#v2-wallet-address-next
+     */
+    case WALLETKIT_NEXTADDR = 'GET v2/wallet/address/next';
+
+    public function getMethod(): string
     {
         return explode(' ', $this->value)[0];
     }
 
-    public function getPath(): string 
+    public function getPath(): string
     {
         return explode(' ', $this->value)[1];
     }

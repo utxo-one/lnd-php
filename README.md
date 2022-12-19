@@ -46,6 +46,7 @@ $nodeInfo->requiresHtlcInterceptor();
 ### Available Methods
 
 ```php
+// Lightning Service
 $lightningService->getInfo();
 $lightningService->abandonChannel();
 $lightningService->addInvoice();
@@ -59,10 +60,7 @@ $lightningService->closedChannels();
 $lightningService->lookupInvoice();
 $lightningService->sendCoins();
 $lightningService->getInfo();
+
+// WalletKit Service
+$walletKitService->nextAddr();
 ```
-
-
-
-
-
-
