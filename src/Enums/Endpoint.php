@@ -186,7 +186,34 @@ enum Endpoint: string
      * 
      * @url https://api.lightning.community/#v2-wallet-address-next
      */
-    case WALLETKIT_NEXTADDR = 'GET v2/wallet/address/next';
+    case WALLETKIT_NEXTADDR = 'POST v2/wallet/address/next';
+
+    /**
+     * List Addresses
+     * 
+     * ListAddresses retrieves all the addresses along with their balance. 
+     * An account name filter can be provided to filter through all of the 
+     * wallet accounts and return the addresses of only those matching.
+     * 
+     * @group WalletKit
+     * 
+     * @url https://api.lightning.community/#v2-wallet-addresses
+     */
+    case WALLETKIT_LISTADDRESSES = 'POST v2/wallet/addresses';
+
+    /**
+     * List Unspent
+     * 
+     * ListUnspent returns a list of all utxos spendable by the wallet with 
+     * a number of confirmations between the specified minimum and maximum. 
+     * By default, all utxos are listed. To list only the unconfirmed utxos, 
+     * set the unconfirmed_only to true.
+     * 
+     * @group WalletKit
+     * 
+     * @url https://api.lightning.community/#v2-wallet-utxos
+     */
+    case WALLETKIT_LISTUNSPENT = 'POST v2/wallet/utxos';
 
     public function getMethod(): string
     {
