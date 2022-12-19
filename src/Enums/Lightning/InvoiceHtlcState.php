@@ -4,8 +4,8 @@ namespace UtxoOne\LndPhp\Enums\Lightning;
 
 use UtxoOne\LndPhp\Traits\EnumHelper;
 
-enum InvoiceHtlcState: int {
-    
+enum InvoiceHtlcState: int
+{
     use EnumHelper;
 
     case ACCEPTED = 0;
