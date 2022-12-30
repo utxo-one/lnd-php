@@ -21,4 +21,15 @@ class UtxoList
 
         return $utxoList;
     }
+
+    public function all(): array
+    {
+        $utxoList = [];
+
+        foreach ($this->data['utxos'] as $utxo) {
+            $utxoList[] = new Utxo($utxo);
+        }
+
+        return $utxoList;
+    }
 }
