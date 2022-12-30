@@ -11,7 +11,7 @@ class UtxoList
     }
 
     /** @return UtxoList */
-    public function __invoke(): UtxoList
+    public function __invoke(): array
     {
         $utxoList = [];
 
@@ -19,6 +19,6 @@ class UtxoList
             $utxoList[] = new Utxo($utxo);
         }
 
-        return new UtxoList($utxoList);
+        return $utxoList;
     }
 }
