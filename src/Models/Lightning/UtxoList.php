@@ -15,7 +15,7 @@ class UtxoList
     {
         $utxoList = [];
 
-        foreach ($this->data['utxos'] as $utxo) {
+        foreach ($this->data as $utxo) {
             $utxoList[] = new Utxo($utxo);
         }
 
@@ -26,7 +26,7 @@ class UtxoList
     {
         $utxoList = [];
 
-        foreach ($this->data['utxos'] as $utxo) {
+        foreach ($this->data as $utxo) {
             $utxoList[] = new Utxo($utxo);
         }
 
