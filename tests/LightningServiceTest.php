@@ -28,7 +28,6 @@ use UtxoOne\LndPhp\Services\LightningService;
 
 final class LightningServiceTest extends BaseTest
 {
-
     private LightningService $lightningService;
 
     public function setUp(): void
@@ -38,8 +37,8 @@ final class LightningServiceTest extends BaseTest
         $this->lightningService = new LightningService(
             host: $this->host,
             port: $this->port,
-            macaroonPath: $this->macaroonPath,
-            tlsCertificatePath: $this->tlsCertificatePath,
+            macaroonHex: $this->macaroon,
+            tlsCertificate: $this->tlsCertificate,
             useSsl: true,
         );
     }
@@ -319,7 +318,7 @@ final class LightningServiceTest extends BaseTest
                 $this->assertInstanceOf(ResolutionOutcome::class, $resolution->getOutcome());
                 $this->assertInstanceOf(OutPoint::class, $resolution->getOutpoint());
                 $this->assertIsInt($resolution->getAmountSat());
-                $this->assertIsString($resolution->getSweepTxid());                
+                $this->assertIsString($resolution->getSweepTxid());
             }
 
             $this->assertIsArray($channel->getAliasScids());
@@ -327,7 +326,7 @@ final class LightningServiceTest extends BaseTest
                 $this->assertIsInt($aliasScid);
             }
 
-            $this->assertIsInt($channel->getZeroConfConfirmedScid());           
+            $this->assertIsInt($channel->getZeroConfConfirmedScid());
         }
     }
 
