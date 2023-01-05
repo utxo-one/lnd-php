@@ -19,8 +19,8 @@ final class WalletKitTest extends BaseTest
         $this->walletKitService = new WalletKitService(
             host: $this->host,
             port: $this->port,
-            macaroonPath: $this->macaroonPath,
-            tlsCertificatePath: $this->tlsCertificatePath,
+            macaroonHex: $this->macaroon,
+            tlsCertificate: $this->tlsCertificate,
             useSsl: true,
         );
     }
@@ -40,8 +40,6 @@ final class WalletKitTest extends BaseTest
     {
         $this->markTestSkipped('appears to be a bug in the rest lnd');
         $response = $this->walletKitService->listAddresses();
-
-        $this->dd($response);
 
         $this->assertIsArray($response->getAccountWithAddresses());
     }
