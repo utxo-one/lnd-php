@@ -4,6 +4,11 @@ namespace UtxoOne\LndPhp\Models\Lightning;
 
 class Amount
 {
+    /**
+     * @var array
+     */
+    private array $data;
+
     public function __construct($data)
     {
         $this->data = $data;
@@ -11,9 +16,9 @@ class Amount
 
     /**
      * Get Sat
-     * 
+     *
      * The amount of satoshis in this amount.
-     * 
+     *
      * @return string
      */
     public function getSat(): string
@@ -23,14 +28,13 @@ class Amount
 
     /**
      * Get Msat
-     * 
+     *
      * The amount of millisatoshis in this amount.
-     * 
+     *
      * @return string
      */
     public function getMsat(): string
     {
         return $this->data['msat'];
     }
-
 }

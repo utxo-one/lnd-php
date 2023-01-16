@@ -12,8 +12,8 @@ use UtxoOne\LndPhp\Responses\WalletKit\NextAddrResponse;
 class WalletKitService extends Lnd
 {
     public function nextAddr(
+        AddressType $type,
         string $account = null,
-        AddressType $type = null,
         bool $change = false,
     ): NextAddrResponse {
         try {
@@ -56,7 +56,6 @@ class WalletKitService extends Lnd
         bool $unconfirmedOnly = false,
     ): ListUnspentResponse {
         try {
-
             return new ListUnspentResponse($this->call(
                 method: Endpoint::WALLETKIT_LISTUNSPENT->getMethod(),
                 endpoint: Endpoint::WALLETKIT_LISTUNSPENT->getPath(),
