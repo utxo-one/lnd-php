@@ -17,10 +17,8 @@ use UtxoOne\LndPhp\Services\LightningService;
 $lightningService = new LightningService(
     host: $this->host,
     port: $this->port,
-    macaroonPath: $this->macaroonPath,
-    tlsCertificatePath: $this->tlsCertificatePath,
-    apiVersion: 'v1',
-    useSsl: true,
+    macaroonHex: $this->macaroonHex,
+    tlsCertificat: $this->tlsCertificate,
 );
 
 // Execute a command. ie getinfo
@@ -59,8 +57,11 @@ $lightningService->closeChannel();
 $lightningService->closedChannels();
 $lightningService->lookupInvoice();
 $lightningService->sendCoins();
+$lightningService->sendMany();
 $lightningService->getInfo();
 
 // WalletKit Service
 $walletKitService->nextAddr();
+$walletKitService->listAddresses();
+$walletKitService->listUnspent();
 ```

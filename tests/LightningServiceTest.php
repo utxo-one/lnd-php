@@ -5,6 +5,9 @@ use UtxoOne\LndPhp\Enums\Lightning\Initiator;
 use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
 use UtxoOne\LndPhp\Enums\Lightning\ResolutionOutcome;
 use UtxoOne\LndPhp\Enums\Lightning\ResolutionType;
+use UtxoOne\LndPhp\Enums\WalletKit\AddressType;
+use UtxoOne\LndPhp\Models\Lightning\AddrToAmountEntry;
+use UtxoOne\LndPhp\Models\Lightning\AddrToAmountEntryList;
 use UtxoOne\LndPhp\Tests\BaseTest;
 use UtxoOne\LndPhp\Models\Lightning\ChainList;
 use UtxoOne\LndPhp\Models\Lightning\Amount;
@@ -24,17 +27,28 @@ use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\SendCoinsResponse;
+use UtxoOne\LndPhp\Responses\Lightning\SendManyResponse;
 use UtxoOne\LndPhp\Services\LightningService;
+use UtxoOne\LndPhp\Services\WalletKitService;
 
 final class LightningServiceTest extends BaseTest
 {
     private LightningService $lightningService;
+    private WalletKitService $walletKitService;
 
     public function setUp(): void
     {
         parent::setUp();
 
         $this->lightningService = new LightningService(
+            host: $this->host,
+            port: $this->port,
+            macaroonHex: $this->macaroon,
+            tlsCertificate: $this->tlsCertificate,
+            useSsl: true,
+        );
+
+        $this->walletKitService = new WalletKitService(
             host: $this->host,
             port: $this->port,
             macaroonHex: $this->macaroon,
@@ -341,6 +355,38 @@ final class LightningServiceTest extends BaseTest
         );
 
         $this->assertInstanceOf(SendCoinsResponse::class, $transaction);
+        $this->assertIsString($transaction->getTxid());
+    }
+
+    /** @group sendMany */
+    public function testItCanSendMany(): void
+    {
+        $address1 = $this->walletKitService->nextAddr(type: AddressType::TAPROOT_PUBKEY, );
+        $address2 = $this->walletKitService->nextAddr(type: AddressType::TAPROOT_PUBKEY, );
+
+        $addrToAmount1 = new AddrToAmountEntry(
+            addr: $address1->getAddr(),
+            amount: '1000',
+        );
+
+        $addrToAmount2 = new AddrToAmountEntry(
+            addr: $address2->getAddr(),
+            amount: '1000',
+        );
+
+        $addrToAmount = new AddrToAmountEntryList(
+            data: [
+                $addrToAmount1,
+                $addrToAmount2,
+            ],
+        );
+
+        $transaction = $this->lightningService->sendMany(
+            addrToAmountEntryList: $addrToAmount,
+        );
+
+        $this->assertInstanceOf(SendManyResponse::class, $transaction);
+
         $this->assertIsString($transaction->getTxid());
     }
 }
