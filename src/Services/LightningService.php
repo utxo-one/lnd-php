@@ -8,6 +8,7 @@ use UtxoOne\LndPhp\Enums\Lightning\InvoiceState;
 use UtxoOne\LndPhp\Models\Lightning\AddrToAmountEntryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummaryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
+use UtxoOne\LndPhp\Models\Lightning\FeeLimit;
 use UtxoOne\LndPhp\Models\Lightning\Invoice;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
@@ -19,6 +20,7 @@ use UtxoOne\LndPhp\Responses\Lightning\CheckMacPermResponse;
 use UtxoOne\LndPhp\Responses\Lightning\CloseChannelResponse;
 use UtxoOne\LndPhp\Responses\Lightning\SendCoinsResponse;
 use UtxoOne\LndPhp\Responses\Lightning\SendManyResponse;
+use UtxoOne\LndPhp\Responses\Lightning\SendResponse;
 use UtxoOne\LndPhp\Services\Lnd;
 
 class LightningService extends Lnd
@@ -706,6 +708,83 @@ class LightningService extends Lnd
                     'spend_unconfirmed' => $spendUnconfirmed,
                     'label' => $label,
                     'sat_per_byte' => $satPerByte,
+                ],
+            ));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * SendPaymentSync
+     *
+     * SendPaymentSync is the synchronous non-streaming version of SendPayment.
+     * This RPC is intended to be consumed by clients of the REST proxy.
+     * Additionally, this RPC expects the destination's public key
+     * and the payment hash (if any) to be encoded as hex strings.
+     *
+     * @link https://lightning.engineering/api-docs/api/lnd/lightning/send-payment-sync
+     *
+     * @param string            $dest                  The identity pubkey of the payment recipient. When using REST, this field must be encoded as base64.
+     * @param string            $dest_string           The hex-encoded identity pubkey of the payment recipient.
+     *                                                 Deprecated now that the REST gateway supports base64 encoding of bytes fields.
+     * @param int               $amt                   The amount to send expressed in satoshis. The fields amt and amt_msat are mutually exclusive.
+     * @param int               $amt_msat              The amount to send expressed in millisatoshis. The fields amt and amt_msat are mutually exclusive.
+     * @param string            $payment_hash          The hex-encoded payment hash to use for the HTLC.
+     * @param string            $payment_hash_string   The payment hash to use for the HTLC. Deprecated now that the REST gateway supports base64 encoding of bytes fields.
+     * @param string            $payment_request       A bare-bones invoice for a payment within the Lightning Network.
+     *                                                 With the details of the invoice, the sender has all the data necessary to send a payment to the recipient.
+     * @param int               $final_cltv_delta      The final delta to use for the last hop. If not specified, the default final delta of 40 blocks is used.
+     * @param FeeLimit          $fee_limit             The maximum fee allowed in satoshis when sending the payment.
+     * @param int               $outgoing_chan_id      The outgoing channel id to use when routing the payment.
+     * @param string            $last_hop_pubkey       The identity pubkey of the last hop. Deprecated now that the REST gateway supports base64 encoding of bytes fields.
+     * @param int               $cltv_limit            The maximum number of blocks the payment can be routed through.
+     * @param array             $dest_custom_records   A map from string to bytes that will be included in the final hop's payload for the destination.
+     * @param bool              $allow_self_payment    If true, then we allow payments to ourselves.
+     * @param FeatureBit[]      $dest_features         A list of feature bits that will be used to determine if the destination supports this payment.
+     * @param string            $payment_addr          The hex-encoded payment address to use for the HTLC.
+     *                                                 Deprecated now that the REST gateway supports base64 encoding of bytes fields.
+     * @return SendResponse
+     */
+    public function sendPaymentSync(
+        string $paymentRequest,
+        ?string $dest = null,
+        ?string $destString = null,
+        ?int $amt = null,
+        ?int $amt_msat = null,
+        ?string $paymentHash = null,
+        ?string $paymentHashString = null,
+        ?int $finalCltvDelta = null,
+        ?FeeLimit $feeLimit = null,
+        ?int $outgoingChanId = null,
+        ?string $lastHopPubkey = null,
+        ?int $cltvLimit = null,
+        ?array $destCustomRecords = null,
+        ?bool $allowSelfPayment = null,
+        ?array $destFeatures = null,
+        ?string $paymentAddr = null,
+    ): SendResponse {
+        try {
+            return new SendResponse($this->call(
+                method: Endpoint::LIGHTNING_SENDPAYMENTSYNC->getMethod(),
+                endpoint: Endpoint::LIGHTNING_SENDPAYMENTSYNC->getPath(),
+                data: [
+                    'dest' => $dest,
+                    'dest_string' => $destString,
+                    'amt' => $amt,
+                    'amt_msat' => $amt_msat,
+                    'payment_hash' => $paymentHash,
+                    'payment_hash_string' => $paymentHashString,
+                    'payment_request' => $paymentRequest,
+                    'final_cltv_delta' => $finalCltvDelta,
+                    'fee_limit' => $feeLimit,
+                    'outgoing_chan_id' => $outgoingChanId,
+                    'last_hop_pubkey' => $lastHopPubkey,
+                    'cltv_limit' => $cltvLimit,
+                    'dest_custom_records' => $destCustomRecords,
+                    'allow_self_payment' => $allowSelfPayment,
+                    'dest_features' => $destFeatures,
+                    'payment_addr' => $paymentAddr,
                 ],
             ));
         } catch (Exception $e) {
