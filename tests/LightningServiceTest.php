@@ -14,6 +14,7 @@ use UtxoOne\LndPhp\Models\Lightning\Amount;
 use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummary;
 use UtxoOne\LndPhp\Models\Lightning\ChannelCloseSummaryList;
 use UtxoOne\LndPhp\Models\Lightning\ChannelPoint;
+use UtxoOne\LndPhp\Models\Lightning\HopList;
 use UtxoOne\LndPhp\Models\Lightning\Invoice;
 use UtxoOne\LndPhp\Models\Lightning\InvoiceFeaturesEntry;
 use UtxoOne\LndPhp\Models\Lightning\InvoiceFeaturesEntryList;
@@ -23,11 +24,13 @@ use UtxoOne\LndPhp\Models\Lightning\NodeFeatureList;
 use UtxoOne\LndPhp\Models\Lightning\NodeInfo;
 use UtxoOne\LndPhp\Models\Lightning\OutPoint;
 use UtxoOne\LndPhp\Models\Lightning\ResolutionList;
+use UtxoOne\LndPhp\Models\Lightning\Route;
 use UtxoOne\LndPhp\Responses\Lightning\AddInvoiceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\BakeMacaroonResponse;
 use UtxoOne\LndPhp\Responses\Lightning\ChannelBalanceResponse;
 use UtxoOne\LndPhp\Responses\Lightning\SendCoinsResponse;
 use UtxoOne\LndPhp\Responses\Lightning\SendManyResponse;
+use UtxoOne\LndPhp\Responses\Lightning\SendResponse;
 use UtxoOne\LndPhp\Services\LightningService;
 use UtxoOne\LndPhp\Services\WalletKitService;
 
@@ -388,5 +391,44 @@ final class LightningServiceTest extends BaseTest
         $this->assertInstanceOf(SendManyResponse::class, $transaction);
 
         $this->assertIsString($transaction->getTxid());
+    }
+
+    /** @group sendPaymentSync */
+    public function testItCanSendPaymentSync(): void
+    {
+        $invoice = $this->lightningService->addInvoice(
+            value: '1000',
+            memo: 'test',
+            expiry: 3600,
+        );
+
+        $payInvoice = $this->lightningService->sendPaymentSync(
+            paymentRequest: $invoice->getPaymentRequest(),
+            allowSelfPayment: true,
+        );
+
+        $this->assertInstanceOf(SendResponse::class, $payInvoice);
+
+        $this->assertIsString($payInvoice->getPaymentError());
+        $this->assertIsString($payInvoice->getPaymentPreimage());
+
+        $this->assertInstanceOf(Route::class, $payInvoice->getPaymentRoute());
+        $this->assertIsInt($payInvoice->getPaymentRoute()->getTotalTimeLock());
+        $this->assertIsString($payInvoice->getPaymentRoute()->getTotalFees());
+        $this->assertIsString($payInvoice->getPaymentRoute()->getTotalAmount());
+
+        $this->assertInstanceOf(HopList::class, $payInvoice->getPaymentRoute()->getHops());
+        foreach ($payInvoice->getPaymentRoute()->getHops() as $hop) {
+            $this->assertInstanceOf(Hop::class, $hop);
+            $this->assertIsString($hop->getChanId());
+            $this->assertIsString($hop->getChanCapacity());
+            $this->assertIsString($hop->getAmtToForward());
+            $this->assertIsString($hop->getFee());
+            $this->assertIsString($hop->getExpiry());
+            $this->assertIsString($hop->getAmtToForwardMsat());
+            $this->assertIsString($hop->getFeeMsat());
+            $this->assertIsString($hop->getPubKey());
+            $this->assertIsString($hop->getTlvPayload());
+        }
     }
 }

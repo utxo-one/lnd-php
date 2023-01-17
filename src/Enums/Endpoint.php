@@ -228,6 +228,20 @@ enum Endpoint: string
      */
     case LIGHTNING_SENDMANY = 'POST v1/transactions/many';
 
+    /**
+     * Send Payment Sync
+     *
+     * lncli: sendpayment SendPayment dispatches a bi-directional streaming RPC for sending payments through the Lightning Network.
+     * A single RPC invocation creates a persistent bi-directional stream allowing clients to rapidly send payments through the Lightning Network with a single persistent connection.
+     * This method differs from SendToRoute in that it allows the destination to specify the entire route, and the amount to send along each hop of the route.
+     * This can be used for things like rebalancing, and atomic swaps.
+     *
+     * @group Lightning
+     *
+     * @url https://lightning.engineering/api-docs/api/lnd/lightning/send-payment-sync/index.html#lnrpchop
+     */
+    case LIGHTNING_SENDPAYMENTSYNC = 'POST v1/channels/transactions';
+
     public function getMethod(): string
     {
         return explode(' ', $this->value)[0];
