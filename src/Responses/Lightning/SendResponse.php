@@ -39,4 +39,24 @@ class SendResponse
     {
         return new Route($this->data['payment_route']);
     }
+
+    /**
+     * Get Payment Hash
+     *
+     * @return string
+     */
+    public function getPaymentHash(): string
+    {
+        return $this->data['payment_hash'];
+    }
+
+    /**
+     * To Array
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->data;
+    }
 }
